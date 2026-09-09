@@ -52,10 +52,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     { id: 99, name: 'Documentário' },
   ];
 
-  // os dois últimos spotlights carregados, exibidos como par de destaques
   highlightPair = computed(() => this.spotlights().slice(-2));
   
-  // visual
   carouselCurrentIndex = signal(0);
   isLoading = signal(true);
   hasError = signal(false);

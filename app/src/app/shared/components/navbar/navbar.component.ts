@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MovieService } from '../../../core/services/movie.service';
+import { LoadingService } from '../../../core/services/loading.service';
 import { MediaResult } from '../../../core/models/tmdb.models';
 import {
   LucideX,
@@ -41,7 +42,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
-  constructor(private movieService: MovieService, private router: Router) {}
+  constructor(
+    private movieService: MovieService,
+    private router: Router,
+    public loading: LoadingService
+  ) {}
 
   ngOnInit(): void {
     this.searchSubject

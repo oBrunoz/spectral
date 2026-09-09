@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
+import { SmoothScrollService } from './core/services/smooth-scroll.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,12 @@ import { FooterComponent } from './shared/components/footer/footer.component';
   templateUrl: './app.html',
   styles: [],
 })
-export class App {
+export class App implements OnInit {
   title = 'boxd';
+
+  private smoothScroll = inject(SmoothScrollService);
+
+  ngOnInit(): void {
+    this.smoothScroll.init();
+  }
 }
