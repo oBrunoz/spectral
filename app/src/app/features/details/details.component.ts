@@ -13,10 +13,10 @@ import { MovieService } from '../../core/services/movie.service';
 import { HeroSectionComponent } from '../../shared/components/hero-section/hero-section.component';
 import { MovieCardComponent } from '../../shared/components/movie-card/movie-card.component';
 import { CastCard, MappedCastMember } from '../../shared/components/cast-card/cast-card';
+import { CarouselRowComponent } from '../../shared/components/carousel-row/carousel-row.component';
 import { ContentDetails, ImagesResponse, Movie, TvShow } from '../../core/models/tmdb.models';
 import { environment } from '../../../environments/environment';
 
-import { LucideChevronLeft, LucideChevronRight } from '@lucide/angular';
 
 export interface MappedSimilarItem {
   id: number;
@@ -30,7 +30,7 @@ export interface MappedSimilarItem {
 @Component({
   selector: 'app-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, HeroSectionComponent, MovieCardComponent, CastCard, LucideChevronLeft, LucideChevronRight],
+  imports: [CommonModule, RouterModule, HeroSectionComponent, MovieCardComponent, CastCard, CarouselRowComponent],
   templateUrl: './details.component.html',
   styleUrls: ['./details.component.css'],
 })
@@ -170,11 +170,4 @@ export class DetailsComponent implements OnInit, OnDestroy {
       });
   });
 
-  scrollLeft(element: HTMLElement) {
-    element.scrollBy({ left: -element.clientWidth * 0.75, behavior: 'smooth' });
-  }
-
-  scrollRight(element: HTMLElement) {
-    element.scrollBy({ left: element.clientWidth * 0.75, behavior: 'smooth' });
-  }
 }
