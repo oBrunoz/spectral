@@ -6,9 +6,12 @@ import { takeUntil } from 'rxjs/operators';
 import { MovieService } from '../../core/services/movie.service';
 import { MovieCardComponent } from '../../shared/components/movie-card/movie-card.component';
 import { HeroSectionComponent } from '../../shared/components/hero-section/hero-section.component';
+import { CarouselRowComponent } from '../../shared/components/carousel-row/carousel-row.component';
 import { Movie, TvShow, SpotlightData } from '../../core/models/tmdb.models';
 import {
   LucideArrowRight,
+  LucideChevronLeft,
+  LucideChevronRight,
   LucideStar,
   LucideUserPlus,
   LucideLogIn,
@@ -22,7 +25,10 @@ import {
     RouterModule,
     MovieCardComponent,
     HeroSectionComponent,
+    CarouselRowComponent,
     LucideArrowRight,
+    LucideChevronLeft,
+    LucideChevronRight,
     LucideStar,
     LucideUserPlus,
     LucideLogIn,
@@ -105,7 +111,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.trendingMovies.set(data.results.slice(0, 10));
+          this.trendingMovies.set(data.results.slice(0, 20));
         },
         error: (err) => console.error('Erro ao carregar trending:', err),
       });
@@ -117,7 +123,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.popularMovies.set(data.results.slice(0, 10));
+          this.popularMovies.set(data.results.slice(0, 20));
         },
         error: (err) => console.error('Erro ao carregar populares:', err),
       });
@@ -129,7 +135,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.trendingSeries.set(data.results.slice(0, 10));
+          this.trendingSeries.set(data.results.slice(0, 20));
         },
         error: (err) => console.error('Erro ao carregar séries em alta:', err),
       });
@@ -179,6 +185,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   goToSlide(index: number) {
     this.carouselCurrentIndex.set(index);
     this.startAutoPlay();
+  }
+
+  nextSlide(): void {
+    const total = this.spotlights().length;
+    if (!total) return;
+    this.goToSlide((this.carouselCurrentIndex() + 1) % total);
+  }
+
+  prevSlide(): void {
+    const total = this.spotlights().length;
+    if (!total) return;
+    this.goToSlide((this.carouselCurrentIndex() - 1 + total) % total);
   }
 
   getMovieYear(movie?: Movie): string {
