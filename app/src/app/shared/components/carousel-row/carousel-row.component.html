@@ -1,0 +1,32 @@
+<div class="relative group/row">
+
+  <button
+    type="button"
+    (click)="scrollBy(-1)"
+    [class.invisible]="!canScrollLeft()"
+    class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-[#111111]/90 border border-white/10 text-white shadow-lg backdrop-blur-sm transition duration-300 hover:bg-[#1f1f1f] hover:border-white/25 opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100"
+    aria-label="Anterior">
+    <svg lucideChevronLeft [size]="22" strokeWidth="2"></svg>
+  </button>
+
+  <div
+    #track
+    data-lenis-prevent-horizontal
+    (scroll)="updateEdges()"
+    [class.track-fade-left]="canScrollLeft() && !canScrollRight()"
+    [class.track-fade-right]="canScrollRight() && !canScrollLeft()"
+    [class.track-fade-both]="canScrollLeft() && canScrollRight()"
+    class="flex gap-4 overflow-x-auto hide-scrollbar snap-x scroll-smooth pb-2">
+    <ng-content></ng-content>
+  </div>
+
+  <button
+    type="button"
+    (click)="scrollBy(1)"
+    [class.invisible]="!canScrollRight()"
+    class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-[#111111]/90 border border-white/10 text-white shadow-lg backdrop-blur-sm transition duration-300 hover:bg-[#1f1f1f] hover:border-white/25 opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100"
+    aria-label="Próximo">
+    <svg lucideChevronRight [size]="22" strokeWidth="2"></svg>
+  </button>
+
+</div>

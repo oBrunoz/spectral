@@ -1,0 +1,20 @@
+.track-fade-right {
+  -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+}
+
+.track-fade-left {
+  -webkit-mask-image: linear-gradient(to left, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to left, #000 88%, transparent 100%);
+}
+
+.track-fade-both {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 6%,
+    #000 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 88%, transparent 100%);
+}
