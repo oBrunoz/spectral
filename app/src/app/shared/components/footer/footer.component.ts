@@ -26,11 +26,6 @@ export class FooterComponent {
   conta: FooterLink[] = [
     { label: 'Entrar', route: '/login' },
     { label: 'Criar conta', route: '/register' },
-  ];
-
-  sobre: FooterLink[] = [
     { label: 'Sobre o Boxd', route: '/' },
-    { label: 'Privacidade', route: '/' },
-    { label: 'Termos de uso', route: '/' },
   ];
 }
