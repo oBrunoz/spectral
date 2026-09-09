@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideStar } from '@lucide/angular';
+import { LucideStar, LucidePlay } from '@lucide/angular';
 
 const GENRE_MAP: Record<number, string> = {
   28: 'Ação', 12: 'Aventura', 16: 'Animação', 35: 'Comédia', 80: 'Crime',
@@ -14,7 +14,7 @@ const GENRE_MAP: Record<number, string> = {
 @Component({
   selector: 'app-movie-card',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideStar],
+  imports: [CommonModule, RouterModule, LucideStar, LucidePlay],
   templateUrl: './movie-card.component.html',
 })
 export class MovieCardComponent {
