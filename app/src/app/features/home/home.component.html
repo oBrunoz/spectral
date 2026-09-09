@@ -61,7 +61,7 @@
             }
           </div>
         } @else {
-          <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x scroll-smooth pb-2">
+          <div data-lenis-prevent-horizontal class="flex gap-4 overflow-x-auto hide-scrollbar snap-x scroll-smooth pb-2">
             @for (movie of trendingMovies(); track movie.id) {
               <div class="flex-none w-60 snap-start">
                 <app-movie-card
@@ -106,7 +106,7 @@
             }
           </div>
         } @else {
-          <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x scroll-smooth pb-2">
+          <div data-lenis-prevent-horizontal class="flex gap-4 overflow-x-auto hide-scrollbar snap-x scroll-smooth pb-2">
             @for (movie of popularMovies(); track movie.id) {
               <div class="flex-none w-60 snap-start">
                 <app-movie-card
@@ -171,7 +171,7 @@
             }
           </div>
         } @else {
-          <div class="flex gap-4 overflow-x-auto hide-scrollbar snap-x scroll-smooth pb-2">
+          <div data-lenis-prevent-horizontal class="flex gap-4 overflow-x-auto hide-scrollbar snap-x scroll-smooth pb-2">
             @for (serie of trendingSeries(); track serie.id) {
               <div class="flex-none w-60 snap-start">
                 <app-movie-card
