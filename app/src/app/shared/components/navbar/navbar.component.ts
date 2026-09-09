@@ -32,6 +32,7 @@ import {
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   sidebarOpen = signal(false);
+  isScrolled = signal(false);
   searchQuery = signal('');
   searchResults = signal<MediaResult[]>([]);
   showResults = signal(false);
@@ -125,6 +126,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return path
       ? `https://image.tmdb.org/t/p/w92${path}`
       : '/images/image_not_found.png';
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    this.isScrolled.set(window.scrollY > 80);
   }
 
   @HostListener('document:keydown.escape')

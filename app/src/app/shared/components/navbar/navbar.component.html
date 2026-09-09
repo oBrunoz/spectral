@@ -1,5 +1,7 @@
 <!-- NAV -->
-<nav class="fixed top-0 left-0 right-0 z-50 max-h-16 bg-gradient-to-b px-6 flex items-center justify-between">
+<nav
+  class="fixed top-0 left-0 right-0 z-50 max-h-16 px-6 flex items-center justify-between transition-colors duration-300"
+  [ngClass]="isScrolled() ? 'bg-[#111111]/90 backdrop-blur-md border-b border-white/5' : ''">
 
   <!-- Hamburguer button -->
   <button
