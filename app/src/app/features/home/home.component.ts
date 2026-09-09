@@ -10,12 +10,8 @@ import { Movie, TvShow, SpotlightData } from '../../core/models/tmdb.models';
 import {
   LucideArrowRight,
   LucideStar,
-  LucideFilm,
-  LucideList,
   LucideUserPlus,
   LucideLogIn,
-  LucideDynamicIcon,
-  type LucideIcon,
 } from '@lucide/angular';
 
 @Component({
@@ -30,7 +26,6 @@ import {
     LucideStar,
     LucideUserPlus,
     LucideLogIn,
-    LucideDynamicIcon,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
@@ -40,7 +35,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   trendingMovies = signal<Movie[]>([]);
   popularMovies = signal<Movie[]>([]);
   trendingSeries = signal<TvShow[]>([]);
-  monthlyHighlight = signal<SpotlightData | undefined>(undefined);
+  lastRecommendation = signal<SpotlightData | undefined>(undefined);
+
+  exploreGenres = [
+    { id: 28, name: 'Ação' },
+    { id: 12, name: 'Aventura' },
+    { id: 35, name: 'Comédia' },
+    { id: 18, name: 'Drama' },
+    { id: 27, name: 'Terror' },
+    { id: 878, name: 'Ficção científica' },
+    { id: 53, name: 'Suspense' },
+    { id: 16, name: 'Animação' },
+    { id: 10749, name: 'Romance' },
+    { id: 9648, name: 'Mistério' },
+    { id: 80, name: 'Crime' },
+    { id: 99, name: 'Documentário' },
+  ];
 
   // os dois últimos spotlights carregados, exibidos como par de destaques
   highlightPair = computed(() => this.spotlights().slice(-2));
@@ -51,24 +61,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   hasError = signal(false);
   shouldDisplayCarouselDots = signal(true);
   skeletonItems = Array(10).fill(0);
-
-  featuresData: { icon: LucideIcon; title: string; desc: string }[] = [
-    {
-      icon: LucideFilm,
-      title: 'Acompanhe filmes',
-      desc: 'Mantenha um registro de todos os filmes que você assistiu e quer assistir. Nunca mais perca suas recomendações.',
-    },
-    {
-      icon: LucideStar,
-      title: 'Avalie e critique',
-      desc: 'Compartilhe suas opiniões sobre filmes e leia avaliações de outros usuários para descobrir novas obras.',
-    },
-    {
-      icon: LucideList,
-      title: 'Crie listas',
-      desc: 'Organize seus filmes em listas personalizadas e compartilhe com amigos. Crie coleções temáticas e muito mais.',
-    },
-  ];
 
   private destroy$ = new Subject<void>();
   private autoPlayInterval: ReturnType<typeof setInterval> | null = null
@@ -81,7 +73,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.loadTrending();
       this.loadPopular();
       this.loadTrendingSeries();
-      this.loadMonthlyHighlight();
+      this.loadLastRecommendation();
     }, 1000);
   }
 
@@ -145,13 +137,13 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadMonthlyHighlight(): void {
+  private loadLastRecommendation(): void {
     this.movieService
       .getSpotlightMovie()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => this.monthlyHighlight.set(data),
-        error: (err) => console.error('Erro ao carregar filme do mês:', err),
+        next: (data) => this.lastRecommendation.set(data),
+        error: (err) => console.error('Erro ao carregar a última recomendação:', err),
       });
   }
 
@@ -217,13 +209,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.trendingMovies.set([]);
     this.popularMovies.set([]);
     this.trendingSeries.set([]);
-    this.monthlyHighlight.set(undefined);
+    this.lastRecommendation.set(undefined);
     setTimeout(() => {
       this.loadSpotlights();
       this.loadTrending();
       this.loadPopular();
       this.loadTrendingSeries();
-      this.loadMonthlyHighlight();
+      this.loadLastRecommendation();
     }, 500);
   }
 }
