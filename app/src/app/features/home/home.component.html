@@ -124,9 +124,168 @@
       }
     </section>
 
-    <div class="w-full h-[500px] bg-black border-y-[1px] border-y-black">
-      <img src="images/teste.png" alt="Fight Club" class="h-full w-full object-cover opacity-50">
-    </div>
+    <!-- Convite para cadastro -->
+    <section class="relative h-[500px] flex items-center overflow-hidden">
+      <img
+        src="images/teste.png"
+        alt="Clube da Luta"
+        class="absolute inset-0 h-full w-full object-cover opacity-30">
+
+      <div
+        class="absolute inset-0 pointer-events-none"
+        style="background: linear-gradient(to bottom, #111111, transparent 35%, transparent 65%, #111111);">
+      </div>
+
+      <div class="container mx-auto px-6 relative z-10 text-center">
+        <h2 class="text-4xl md:text-5xl font-bold text-white leading-tight">
+          Todo filme que você assiste conta uma história
+        </h2>
+        <p class="text-gray-300 mt-5 max-w-2xl mx-auto">
+          Crie sua conta para guardar o que já assistiu, montar sua lista do que ainda quer ver
+          e abrir os detalhes completos de qualquer título.
+        </p>
+
+        <div class="flex justify-center space-x-4 flex-wrap gap-y-3 mt-8">
+          <a routerLink="/register"
+            class="px-6 py-3 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-300 flex items-center">
+            <svg lucideUserPlus class="mr-2" [size]="16" strokeWidth="2"></svg> Criar conta grátis
+          </a>
+          <a routerLink="/login"
+            class="px-6 py-3 bg-gray-800 bg-opacity-80 text-white rounded-full hover:bg-gray-700 transition duration-300 flex items-center">
+            <svg lucideLogIn class="mr-2" [size]="16" strokeWidth="2"></svg> Entrar
+          </a>
+        </div>
+
+        <p class="text-gray-500 text-sm mt-6">É de graça e leva menos de um minuto.</p>
+      </div>
+    </section>
+
+    <!-- Trending Series Section -->
+    <section class="container min-w-full px-20 pt-16 mb-16 overflow-visible">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold text-white">Séries em alta</h2>
+        <a routerLink="/series" class="text-red-500 hover:text-red-600 flex items-center gap-1">
+          Ver todas <svg lucideArrowRight [size]="16" strokeWidth="2"></svg>
+        </a>
+      </div>
+
+      @if (trendingSeries().length === 0) {
+        <div class="flex h-full gap-4 overflow-hidden pb-2">
+          @for (item of skeletonItems; track $index) {
+            <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg flex-none w-60">
+              <div class="aspect-[2/3] bg-gray-700 animate-pulse"></div>
+              <div class="p-3">
+                <div class="h-4 bg-gray-700 rounded animate-pulse mb-2"></div>
+                <div class="h-3 bg-gray-700 rounded animate-pulse w-2/3"></div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="flex h-full gap-4 overflow-hidden scrollbar-hide">
+          @for (serie of trendingSeries(); track serie.id; let last = $last) {
+            <div class="flex-none w-60">
+              <app-movie-card
+                [id]="serie.id"
+                [title]="serie.name"
+                [posterPath]="serie.poster_path"
+                [backdropPath]="serie.backdrop_path"
+                [year]="getSeriesYear(serie)"
+                [rating]="serie.vote_average"
+                [overview]="serie.overview"
+                [genreIds]="serie.genre_ids ?? []"
+                [hoverSide]="last ? 'left' : 'right'"
+                mediaType="series">
+              </app-movie-card>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Destaques em par -->
+    <section class="container min-w-full px-20 mb-16">
+      @if (highlightPair().length < 2) {
+        <div class="grid md:grid-cols-2 gap-6">
+          @for (item of [0, 1]; track $index) {
+            <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg h-[420px] animate-pulse">
+              <div class="h-full w-full bg-gray-700"></div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="grid md:grid-cols-2 gap-6">
+          @for (item of highlightPair(); track item.movie.id) {
+            <div class="relative h-[590px] rounded-lg overflow-hidden shadow-lg bg-gray-800 group">
+              <img
+                [src]="item.backgroundUrl"
+                [alt]="item.movie.title"
+                class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition duration-500"
+                loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/70 to-black/30"></div>
+
+              <div class="relative z-10 h-full flex flex-col justify-end p-6">
+                <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm w-fit">Em alta</span>
+
+                @if (item.logoUrl) {
+                  <img [src]="item.logoUrl" [alt]="item.movie.title" class="mt-4 max-h-20 max-w-[240px] object-contain object-left drop-shadow-lg" />
+                } @else {
+                  <h3 class="text-3xl font-bold text-white mt-4">{{ item.movie.title }}</h3>
+                }
+
+                <div class="flex items-center flex-wrap gap-x-4 text-white text-sm mt-4 [&>*+*]:before:content-['•'] [&>*+*]:before:pr-4 [&>*+*]:before:text-gray-300">
+                  @if (item.movie.vote_average) {
+                    <span class="flex items-center gap-1">
+                      <svg lucideStar [size]="14" strokeWidth="2" class="text-yellow-500" fill="currentColor"></svg>
+                      {{ item.movie.vote_average.toFixed(1) }}
+                    </span>
+                  }
+                  <span>{{ getMovieYear(item.movie) }}</span>
+                  @if (item.details?.runtime) {
+                    <span>{{ formatRuntime(item.details.runtime) }}</span>
+                  }
+                </div>
+
+                @if (item.details?.genres?.length) {
+                  <div class="flex flex-wrap gap-2 mt-3">
+                    @for (genre of (item.details?.genres ?? []).slice(0, 4); track genre.id) {
+                      <span class="bg-yellow-400/10 border border-yellow-500 text-yellow-300 text-xs font-semibold px-3 py-1 rounded-full">
+                        {{ genre.name }}
+                      </span>
+                    }
+                  </div>
+                }
+
+                <p class="text-gray-300 text-sm mt-4 line-clamp-3">{{ item.movie.overview }}</p>
+
+                <a [routerLink]="['/search', 'movies', item.movie.id]"
+                  class="px-6 py-3 mt-5 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-300 flex items-center w-fit">
+                  Ver detalhes <svg lucideArrowRight class="ml-2" [size]="16" strokeWidth="2"></svg>
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Filme do mês -->
+    <app-hero-section
+      label="Filme do mês"
+      [title]="monthlyHighlight()?.movie?.title ?? ''"
+      [backgroundUrl]="monthlyHighlight()?.backgroundUrl ?? ''"
+      [logoUrl]="monthlyHighlight()?.logoUrl ?? ''"
+      [isLoading]="!monthlyHighlight() && !hasError()"
+      [hasError]="hasError()"
+      [rating]="monthlyHighlight()?.movie?.vote_average"
+      [releaseYear]="getMovieYear(monthlyHighlight()?.movie)"
+      [runtime]="formatRuntime(monthlyHighlight()?.details?.runtime)"
+      [tagline]="monthlyHighlight()?.details?.tagline ?? ''"
+      [genres]="monthlyHighlight()?.details?.genres ?? []"
+      [overview]="monthlyHighlight()?.movie?.overview ?? ''"
+      [trailerUrl]="monthlyHighlight()?.trailerUrl ?? '#'"
+      (retryClicked)="retry()">
+    </app-hero-section>
 
     <!-- Features Section -->
     <section class="bg-gray-800 py-16">

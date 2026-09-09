@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -6,12 +6,14 @@ import { takeUntil } from 'rxjs/operators';
 import { MovieService } from '../../core/services/movie.service';
 import { MovieCardComponent } from '../../shared/components/movie-card/movie-card.component';
 import { HeroSectionComponent } from '../../shared/components/hero-section/hero-section.component';
-import { Movie, SpotlightData } from '../../core/models/tmdb.models';
+import { Movie, TvShow, SpotlightData } from '../../core/models/tmdb.models';
 import {
   LucideArrowRight,
-  LucideFilm,
   LucideStar,
+  LucideFilm,
   LucideList,
+  LucideUserPlus,
+  LucideLogIn,
   LucideDynamicIcon,
   type LucideIcon,
 } from '@lucide/angular';
@@ -19,7 +21,17 @@ import {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, MovieCardComponent, HeroSectionComponent, LucideArrowRight, LucideDynamicIcon],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MovieCardComponent,
+    HeroSectionComponent,
+    LucideArrowRight,
+    LucideStar,
+    LucideUserPlus,
+    LucideLogIn,
+    LucideDynamicIcon,
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
@@ -27,6 +39,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   spotlights = signal<SpotlightData[]>([]);
   trendingMovies = signal<Movie[]>([]);
   popularMovies = signal<Movie[]>([]);
+  trendingSeries = signal<TvShow[]>([]);
+  monthlyHighlight = signal<SpotlightData | undefined>(undefined);
+
+  // os dois últimos spotlights carregados, exibidos como par de destaques
+  highlightPair = computed(() => this.spotlights().slice(-2));
   
   // visual
   carouselCurrentIndex = signal(0);
@@ -63,6 +80,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.loadSpotlights();
       this.loadTrending();
       this.loadPopular();
+      this.loadTrendingSeries();
+      this.loadMonthlyHighlight();
     }, 1000);
   }
 
@@ -114,6 +133,28 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadTrendingSeries(): void {
+    this.movieService
+      .getTrendingTv('week')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.trendingSeries.set(data.results.slice(0, 10));
+        },
+        error: (err) => console.error('Erro ao carregar séries em alta:', err),
+      });
+  }
+
+  private loadMonthlyHighlight(): void {
+    this.movieService
+      .getSpotlightMovie()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => this.monthlyHighlight.set(data),
+        error: (err) => console.error('Erro ao carregar filme do mês:', err),
+      });
+  }
+
   private clearInterval(): void {
     if (this.autoPlayInterval) clearInterval(this.autoPlayInterval);
   }
@@ -128,9 +169,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   get runtime(): string {
-    const rt = this.currentSpotlight?.details?.runtime;
-    if (!rt) return '';
-    return `${Math.floor(rt / 60)}h ${rt % 60}min`;
+    return this.formatRuntime(this.currentSpotlight?.details?.runtime);
+  }
+
+  formatRuntime(minutes?: number): string {
+    if (!minutes) return '';
+    return `${Math.floor(minutes / 60)}h ${minutes % 60}min`;
   }
 
   get releaseYear(): string {
@@ -147,8 +191,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.startAutoPlay();
   }
 
-  getMovieYear(movie: Movie): string {
-    return movie.release_date ? String(new Date(movie.release_date).getFullYear()) : '';
+  getMovieYear(movie?: Movie): string {
+    return movie?.release_date ? String(new Date(movie.release_date).getFullYear()) : '';
+  }
+
+  getSeriesYear(serie: TvShow): string {
+    return serie.first_air_date ? String(new Date(serie.first_air_date).getFullYear()) : '';
   }
 
   pauseAutoPlay(): void {
@@ -168,10 +216,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.spotlights.set([]);
     this.trendingMovies.set([]);
     this.popularMovies.set([]);
+    this.trendingSeries.set([]);
+    this.monthlyHighlight.set(undefined);
     setTimeout(() => {
       this.loadSpotlights();
       this.loadTrending();
       this.loadPopular();
+      this.loadTrendingSeries();
+      this.loadMonthlyHighlight();
     }, 500);
   }
 }
