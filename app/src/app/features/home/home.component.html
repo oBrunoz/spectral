@@ -232,7 +232,7 @@
           <div class="flex space-x-4 flex-wrap gap-y-3 mt-10">
             <a routerLink="/register"
               class="px-6 py-3 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-300 flex items-center">
-              <svg lucideUserPlus class="mr-2" [size]="16" strokeWidth="2"></svg> Criar conta grátis
+              <svg lucideUserPlus class="mr-2" [size]="16" strokeWidth="2"></svg> Criar conta agora
             </a>
             <a routerLink="/login"
               class="px-6 py-3 bg-white/10 text-white rounded-full hover:bg-white/20 transition duration-300 flex items-center">
@@ -258,7 +258,7 @@
       } @else {
         <div class="grid md:grid-cols-2 gap-6">
           @for (item of highlightPair(); track item.movie.id) {
-            <div class="relative h-[440px] rounded-xl overflow-hidden shadow-lg bg-[#1a1a1a] group">
+            <div class="relative h-[550px] rounded-xl overflow-hidden shadow-lg bg-[#1a1a1a] group">
               <img
                 [src]="item.backgroundUrl"
                 [alt]="item.movie.title"
