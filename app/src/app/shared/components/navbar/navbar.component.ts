@@ -14,25 +14,16 @@ import { takeUntil } from 'rxjs/operators';
 import { MovieService } from '../../../core/services/movie.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { MediaResult } from '../../../core/models/tmdb.models';
-import {
-  LucideX,
-  LucideHouse,
-  LucideClapperboard,
-  LucideTv,
-  LucideSearch,
-  LucideUserPlus,
-  LucideLogIn,
-} from '@lucide/angular';
+import { LucideSearch, LucideStar } from '@lucide/angular';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LucideX, LucideHouse, LucideClapperboard, LucideTv, LucideSearch, LucideUserPlus, LucideLogIn],
+  imports: [CommonModule, RouterModule, FormsModule, LucideSearch, LucideStar],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  sidebarOpen = signal(false);
   isScrolled = signal(false);
   searchQuery = signal('');
   searchResults = signal<MediaResult[]>([]);
@@ -86,16 +77,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.searchSubject.next(value);
   }
 
+  onSearchFocus(): void {
+    if (this.searchQuery().trim() && this.searchResults().length > 0) {
+      this.showResults.set(true);
+    }
+  }
+
   onSearchBlur(): void {
     setTimeout(() => this.showResults.set(false), 150);
-  }
-
-  toggleSidebar(): void {
-    this.sidebarOpen.update((v) => !v);
-  }
-
-  closeSidebar(): void {
-    this.sidebarOpen.set(false);
   }
 
   navigateTo(result: any): void {
@@ -120,10 +109,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   getResultType(result: any): string {
-    if (result.media_type === 'movie') return '🎬 Filme';
-    if (result.media_type === 'tv') return '📺 Série';
-    if (result.media_type === 'person') return '👤 Pessoa';
-    return '🎲 Outro';
+    if (result.media_type === 'movie') return 'Filme';
+    if (result.media_type === 'tv') return 'Série';
+    if (result.media_type === 'person') return 'Pessoa';
+    return 'Outro';
+  }
+
+  getResultRating(result: any): number {
+    return result.vote_average ?? 0;
   }
 
   getResultImage(result: any): string {
@@ -140,7 +133,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    this.sidebarOpen.set(false);
     this.showResults.set(false);
   }
 }
