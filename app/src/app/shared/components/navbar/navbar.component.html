@@ -1,6 +1,6 @@
 <!-- NAV -->
 <nav
-  class="fixed top-0 left-0 right-0 z-50 max-h-16 px-6 flex items-center justify-between transition-colors duration-300"
+  class="fixed top-0 left-0 right-0 z-50 h-16 px-6 flex items-center justify-between transition-colors duration-300"
   [ngClass]="isScrolled() ? 'bg-[#111111]/90 backdrop-blur-md border-b border-white/5' : ''">
 
   <div
@@ -16,148 +16,103 @@
     </div>
   </div>
 
-  <!-- Hamburguer button -->
-  <button
-    (click)="toggleSidebar()"
-    class="hamburger z-50 relative w-10 h-10 cursor-pointer flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-200"
-    [class.active]="sidebarOpen()"
-    aria-label="Menu">
-    <svg viewBox="0 0 32 32" class="h-7 w-7 text-white">
-      <path class="line line-top-bottom"
-        d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
-        stroke="#ffffff" fill="none" stroke-width="2" stroke-linecap="round" />
-      <path class="line" d="M7 16 27 16" stroke="#ffffff" fill="none" stroke-width="2" stroke-linecap="round" />
-    </svg>
-  </button>
-
-  <!-- Sidebar overlay -->
-  <div
-    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-opacity duration-300"
-    [class.opacity-0]="!sidebarOpen()"
-    [class.pointer-events-none]="!sidebarOpen()"
-    [class.opacity-100]="sidebarOpen()"
-    (click)="closeSidebar()">
-  </div>
-
-  <!-- Sidebar -->
-  <div
-    class="fixed top-0 left-0 h-full w-72 z-50 transition-transform duration-300 ease-in-out"
-    [class.-translate-x-full]="!sidebarOpen()"
-    [class.translate-x-0]="sidebarOpen()">
-
-    <div class="h-full flex flex-col bg-[#152331]/95 backdrop-blur-2xl border-r border-white/[0.06]">
-
-      <!-- Header -->
-      <div class="flex items-center justify-between px-5 pt-5 pb-5">
-        <img src="/images/logo_bg_white_2.png" alt="Boxd" class="h-7 w-auto opacity-80" />
-        <button
-          (click)="closeSidebar()"
-          class="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all duration-200"
-          aria-label="Fechar menu">
-          <svg lucideX [size]="18" strokeWidth="1.5"></svg>
-        </button>
-      </div>
-
-      <!-- Navigation -->
-      <nav data-lenis-prevent class="flex-1 px-3 overflow-y-auto">
-        <p class="px-2 mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/20">Navegar</p>
-
-        <a routerLink="/" (click)="closeSidebar()"
-          class="flex items-center gap-3 px-2 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.05] transition-all duration-200 group">
-          <span class="text-gray-500 text-sm">
-            <svg lucideHouse [size]="20" strokeWidth="2"></svg>
-          </span>
-          <span class="text-sm font-medium">Home</span>
-        </a>
-
-        <a routerLink="/movies" (click)="closeSidebar()"
-          class="flex items-center gap-3 px-2 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.05] transition-all duration-200 group">
-          <span class="text-gray-500 text-sm">
-            <svg lucideClapperboard [size]="20" strokeWidth="2"></svg>
-          </span>
-          <span class="text-sm font-medium">Filmes</span>
-        </a>
-
-        <a routerLink="/series" (click)="closeSidebar()"
-          class="flex items-center gap-3 px-2 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.05] transition-all duration-200 group">
-          <span class="text-gray-500 text-sm">
-            <svg lucideTv [size]="20" strokeWidth="2"></svg>
-          </span>
-          <span class="text-sm font-medium">Séries</span>
-        </a>
-      </nav>
-
-      <!-- Auth -->
-      <div class="px-3 pb-6 pt-4 border-t border-white/[0.06] space-y-2">
-        <a routerLink="/register" (click)="closeSidebar()"
-          class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-white/10 hover:bg-white/15 border border-white/10 hover:border-white/20 transition-all duration-200">
-          <svg lucideUserPlus [size]="15" strokeWidth="1.75"></svg>
-          Cadastrar
-        </a>
-        <a routerLink="/login" (click)="closeSidebar()"
-          class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-green-400/60 hover:text-white border border-white/10 hover:border-white/20 transition-all duration-200">
-          <svg lucideLogIn [size]="15" strokeWidth="1.75"></svg>
-          Entrar
-        </a>
-      </div>
-
-    </div>
+  <!-- Navegação -->
+  <div class="flex items-center gap-1 z-50">
+    <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+      Home
+    </a>
+    <a routerLink="/movies" routerLinkActive="is-active"
+      class="nav-item px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+      Filmes
+    </a>
+    <a routerLink="/series" routerLinkActive="is-active"
+      class="nav-item px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+      Séries
+    </a>
   </div>
 
   <!-- Logo -->
-  <a routerLink="/" class="z-50">
+  <a routerLink="/" class="absolute left-1/2 -translate-x-1/2 z-40">
     <img src="/images/logo_bg_white.png" alt="Boxd Logo" class="h-36 w-auto" />
   </a>
 
-  <!-- Search -->
-  <div class="relative w-10 h-10 text-white group opacity-60 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
-    <input
-      type="text"
-      [value]="searchQuery()"
-      (input)="onSearchInput($any($event.target).value)"
-      (blur)="onSearchBlur()"
-      placeholder="Busque por filmes, séries ou pessoas..."
-      class="peer absolute top-0 right-0 w-10 max-w-80 z-50 focus:w-80 h-10 pl-6 pr-4 rounded-full text-sm outline-none transition-all duration-300 ease-in-out bg-transparent focus:bg-[#191A1E]/80 focus:backdrop-blur-sm focus:border focus:border-white/10 cursor-pointer peer-focus:cursor-text placeholder-zinc-500"
-    />
-    <label class="absolute left-0 top-0 w-10 h-10 p-2 z-50 cursor-pointer flex items-center justify-center">
-      <svg lucideSearch [size]="22" strokeWidth="1.75" color="#ffffff"></svg>
-    </label>
+  <!-- Busca + conta -->
+  <div class="flex items-center gap-3 z-50">
 
-    <!-- Search Results Dropdown -->
-    <div
-      data-lenis-prevent
-      class="absolute top-12 right-0 mt-2 max-h-[400px] w-80 overflow-y-auto z-40 bg-[#191A1E] shadow-lg rounded-lg text-white border border-zinc-700 transform transition-all duration-300 origin-top"
-      [class.scale-y-0]="!showResults()"
-      [class.opacity-0]="!showResults()"
-      [class.pointer-events-none]="!showResults()"
-      [class.scale-y-100]="showResults()"
-      [class.opacity-100]="showResults()"
-      [class.pointer-events-auto]="showResults()">
+    <!-- Search -->
+    <div class="relative w-10 h-10 text-white opacity-60 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
+      <input
+        type="text"
+        [value]="searchQuery()"
+        (input)="onSearchInput($any($event.target).value)"
+        (focus)="onSearchFocus()"
+        (blur)="onSearchBlur()"
+        placeholder="Buscar filmes, séries ou pessoas"
+        class="peer absolute top-0 right-0 w-10 max-w-80 z-50 focus:w-80 h-10 pl-11 pr-5 rounded-full text-sm text-white outline-none transition-all duration-300 ease-in-out bg-transparent focus:bg-[#1a1a1a]/95 focus:backdrop-blur-md border border-transparent focus:border-white/15 cursor-pointer peer-focus:cursor-text placeholder-transparent focus:placeholder-gray-500"
+      />
+      <label class="absolute left-0 top-0 w-10 h-10 z-50 cursor-pointer flex items-center justify-center text-gray-400 peer-focus:text-white transition-colors duration-300">
+        <svg lucideSearch [size]="20" strokeWidth="2"></svg>
+      </label>
 
-      @if (isSearching()) {
-        <p class="p-4 text-sm text-zinc-400">Buscando...</p>
-      } @else if (searchResults().length === 0) {
-        <p class="p-4 text-sm text-zinc-400">Nenhum resultado encontrado.</p>
-      } @else {
-        @for (result of searchResults(); track result.id) {
-          <a
-            (mousedown)="navigateTo(result)"
-            class="flex items-center gap-3 p-3 hover:bg-zinc-800 transition-colors duration-200 rounded cursor-pointer">
-            <img
-              [src]="getResultImage(result)"
-              [alt]="getResultTitle(result)"
-              class="w-12 h-16 object-cover rounded bg-zinc-800"
-            />
-            <div class="flex flex-col">
-              <div class="flex flex-row gap-3">
-                <h3 class="text-sm font-medium line-clamp-1">{{ getResultTitle(result) }}</h3>
-                <h3 class="text-sm font-light line-clamp-1 text-gray-400">{{ getResultYear(result) }}</h3>
-              </div>
-              <p class="text-xs text-zinc-400">{{ getResultType(result) }}</p>
-            </div>
-          </a>
+      <!-- Search Results Dropdown -->
+      <div
+        data-lenis-prevent
+        class="absolute top-12 right-0 mt-2 max-h-[420px] w-80 overflow-y-auto z-40 bg-[#1a1a1a] shadow-2xl rounded-2xl text-white border border-white/10 transform transition-all duration-300 origin-top"
+        [class.scale-y-0]="!showResults()"
+        [class.opacity-0]="!showResults()"
+        [class.pointer-events-none]="!showResults()"
+        [class.scale-y-100]="showResults()"
+        [class.opacity-100]="showResults()"
+        [class.pointer-events-auto]="showResults()">
+
+        @if (isSearching()) {
+          <p class="px-4 py-5 text-sm text-gray-400">Buscando…</p>
+        } @else if (searchResults().length === 0) {
+          <p class="px-4 py-5 text-sm text-gray-400">Nenhum resultado encontrado.</p>
+        } @else {
+          <div class="p-2 space-y-1">
+            @for (result of searchResults(); track result.id) {
+              <a
+                (mousedown)="navigateTo(result)"
+                class="group/item flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 transition duration-300 cursor-pointer">
+                <img
+                  [src]="getResultImage(result)"
+                  [alt]="getResultTitle(result)"
+                  class="w-11 h-16 object-cover rounded-lg bg-[#111111] shrink-0"
+                />
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-sm font-semibold text-white truncate transition duration-300 group-hover/item:text-red-500">
+                    {{ getResultTitle(result) }}
+                  </h3>
+                  <p class="mt-1 text-xs text-gray-400">
+                    {{ getResultType(result) }}
+                    @if (getResultYear(result)) {
+                      <span class="text-gray-500">· {{ getResultYear(result) }}</span>
+                    }
+                  </p>
+                </div>
+                @if (getResultRating(result) > 0) {
+                  <span class="shrink-0 bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
+                    <svg lucideStar [size]="11" strokeWidth="2" fill="currentColor"></svg>
+                    {{ getResultRating(result).toFixed(1) }}
+                  </span>
+                }
+              </a>
+            }
+          </div>
         }
-      }
+      </div>
     </div>
+
+    <!-- Conta -->
+    <a routerLink="/login"
+      class="px-5 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white transition duration-300">
+      Entrar
+    </a>
+    <a routerLink="/register"
+      class="px-6 py-2.5 rounded-full text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition duration-300 flex items-center">
+      Cadastrar
+    </a>
   </div>
 </nav>
