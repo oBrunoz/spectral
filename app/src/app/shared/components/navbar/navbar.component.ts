@@ -4,6 +4,10 @@ import {
   OnDestroy,
   signal,
   HostListener,
+  ViewChild,
+  ViewChildren,
+  ElementRef,
+  QueryList,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -14,21 +18,26 @@ import { takeUntil } from 'rxjs/operators';
 import { MovieService } from '../../../core/services/movie.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { MediaResult } from '../../../core/models/tmdb.models';
-import { LucideSearch, LucideStar } from '@lucide/angular';
+import { LucideSearch, LucideStar, LucideX } from '@lucide/angular';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LucideSearch, LucideStar],
+  imports: [CommonModule, RouterModule, FormsModule, LucideSearch, LucideStar, LucideX],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
+  sidebarOpen = signal(false);
   isScrolled = signal(false);
   searchQuery = signal('');
   searchResults = signal<MediaResult[]>([]);
   showResults = signal(false);
   isSearching = signal(false);
+  activeIndex = signal(-1);
+
+  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
+  @ViewChildren('resultItem') resultItems?: QueryList<ElementRef<HTMLElement>>;
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -48,6 +57,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           if (!query.trim()) {
             this.searchResults.set([]);
             this.showResults.set(false);
+            this.activeIndex.set(-1);
             return of(null);
           }
           this.isSearching.set(true);
@@ -59,7 +69,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.isSearching.set(false);
           if (data) {
-            this.searchResults.set(data.results.filter((r: any) => r.title || r.name));
+            this.searchResults.set(
+              data.results.filter((r: any) => r.title || r.name).slice(0, 8)
+            );
+            this.activeIndex.set(-1);
             this.showResults.set(true);
           }
         },
@@ -75,6 +88,55 @@ export class NavbarComponent implements OnInit, OnDestroy {
   onSearchInput(value: string): void {
     this.searchQuery.set(value);
     this.searchSubject.next(value);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.searchSubject.next('');
+    this.searchResults.set([]);
+    this.showResults.set(false);
+    this.activeIndex.set(-1);
+    this.searchInput?.nativeElement.focus();
+  }
+
+  onSearchKeydown(event: KeyboardEvent): void {
+    const results = this.searchResults();
+
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (!this.showResults() || results.length === 0) return;
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      const next = (this.activeIndex() + step + results.length) % results.length;
+      this.activeIndex.set(next);
+      this.scrollActiveIntoView();
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      const active = results[this.activeIndex()];
+      if (active) {
+        event.preventDefault();
+        this.navigateTo(active);
+        this.searchInput?.nativeElement.blur();
+      }
+    }
+  }
+
+  private scrollActiveIntoView(): void {
+    const item = this.resultItems?.get(this.activeIndex());
+    item?.nativeElement.scrollIntoView({ block: 'nearest' });
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen.update((v) => !v);
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen.set(false);
   }
 
   onSearchFocus(): void {
@@ -133,6 +195,22 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    this.sidebarOpen.set(false);
     this.showResults.set(false);
+    this.activeIndex.set(-1);
+    this.searchInput?.nativeElement.blur();
+  }
+
+  /** "/" foca a busca, como em sites de catálogo. */
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+
+    const target = event.target as HTMLElement | null;
+    const tag = target?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return;
+
+    event.preventDefault();
+    this.searchInput?.nativeElement.focus();
   }
 }

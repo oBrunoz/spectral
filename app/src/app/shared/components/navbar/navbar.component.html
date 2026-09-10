@@ -1,6 +1,6 @@
 <!-- NAV -->
 <nav
-  class="fixed top-0 left-0 right-0 z-50 h-16 px-6 flex items-center justify-between transition-colors duration-300"
+  class="fixed top-0 left-0 right-0 z-50 h-16 px-3 sm:px-6 grid grid-cols-[1fr_auto_1fr] items-center transition-colors duration-300"
   [ngClass]="isScrolled() ? 'bg-[#111111]/90 backdrop-blur-md border-b border-white/5' : ''">
 
   <div
@@ -17,49 +17,85 @@
   </div>
 
   <!-- Navegação -->
-  <div class="flex items-center gap-1 z-50">
-    <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }"
-      class="nav-item px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+  <div class="flex items-center gap-0.5 sm:gap-1 min-w-0 z-50">
+
+    <!-- Hamburguer (abaixo de md) -->
+    <button
+      (click)="toggleSidebar()"
+      class="hamburger md:hidden relative w-10 h-10 cursor-pointer flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-200"
+      [class.active]="sidebarOpen()"
+      [attr.aria-expanded]="sidebarOpen()"
+      aria-label="Menu">
+      <svg viewBox="0 0 32 32" class="h-7 w-7 text-white">
+        <path class="line line-top-bottom"
+          d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
+          stroke="#ffffff" fill="none" stroke-width="2" stroke-linecap="round" />
+        <path class="line" d="M7 16 27 16" stroke="#ffffff" fill="none" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <a routerLink="/" (click)="scrollToTop()" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item hidden md:flex px-2.5 sm:px-3 lg:px-4 py-2 rounded-full text-xs sm:text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
       Home
     </a>
     <a routerLink="/movies" routerLinkActive="is-active"
-      class="nav-item px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+      class="nav-item hidden md:flex px-2.5 sm:px-3 lg:px-4 py-2 rounded-full text-xs sm:text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
       Filmes
     </a>
     <a routerLink="/series" routerLinkActive="is-active"
-      class="nav-item px-4 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+      class="nav-item hidden md:flex px-2.5 sm:px-3 lg:px-4 py-2 rounded-full text-xs sm:text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
       Séries
     </a>
   </div>
 
-  <!-- Logo -->
-  <a routerLink="/" class="absolute left-1/2 -translate-x-1/2 z-40">
-    <img src="/images/logo_bg_white.png" alt="Boxd Logo" class="h-36 w-auto" />
+  <!-- Logo — a coluna reserva a largura (imagem quadrada); o excedente vertical é intencional -->
+  <a routerLink="/" (click)="scrollToTop()" aria-label="Boxd — início"
+    class="relative h-16 w-16 sm:w-20 md:w-28 lg:w-36 z-40">
+    <img src="/images/logo_bg_white.png" alt="Boxd Logo"
+      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-16 sm:h-20 md:h-28 lg:h-36 w-auto max-w-none" />
   </a>
 
   <!-- Busca + conta -->
-  <div class="flex items-center gap-3 z-50">
+  <div class="flex items-center justify-end gap-2 sm:gap-3 min-w-0 z-50">
 
     <!-- Search -->
-    <div class="relative w-10 h-10 text-white opacity-60 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
-      <input
-        type="text"
-        [value]="searchQuery()"
-        (input)="onSearchInput($any($event.target).value)"
-        (focus)="onSearchFocus()"
-        (blur)="onSearchBlur()"
-        placeholder="Buscar filmes, séries ou pessoas"
-        class="peer absolute top-0 right-0 w-10 max-w-80 z-50 focus:w-80 h-10 pl-11 pr-5 rounded-full text-sm text-white outline-none transition-all duration-300 ease-in-out bg-transparent focus:bg-[#1a1a1a]/95 focus:backdrop-blur-md border border-transparent focus:border-white/15 cursor-pointer peer-focus:cursor-text placeholder-transparent focus:placeholder-gray-500"
-      />
-      <label class="absolute left-0 top-0 w-10 h-10 z-50 cursor-pointer flex items-center justify-center text-gray-400 peer-focus:text-white transition-colors duration-300">
-        <svg lucideSearch [size]="20" strokeWidth="2"></svg>
-      </label>
+    <div class="relative">
+      <div
+        class="flex items-center gap-2 h-10 w-36 sm:w-44 md:w-56 lg:w-64 pl-3 sm:pl-4 pr-2 rounded-full border transition-colors duration-300"
+        [ngClass]="showResults() ? 'bg-[#1a1a1a] border-white/20' : 'bg-white/5 border-white/10 hover:border-white/20'">
+
+        <svg lucideSearch [size]="16" strokeWidth="2" class="shrink-0 text-gray-400"></svg>
+
+        <input
+          #searchInput
+          type="text"
+          [value]="searchQuery()"
+          (input)="onSearchInput($any($event.target).value)"
+          (focus)="onSearchFocus()"
+          (blur)="onSearchBlur()"
+          (keydown)="onSearchKeydown($event)"
+          placeholder="Buscar"
+          aria-label="Buscar filmes, séries ou pessoas"
+          class="min-w-0 flex-1 h-full bg-transparent text-sm text-white placeholder-gray-500 outline-none"
+        />
+
+        @if (searchQuery()) {
+          <button
+            type="button"
+            (mousedown)="$event.preventDefault()"
+            (click)="clearSearch()"
+            class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition duration-300"
+            aria-label="Limpar busca">
+            <svg lucideX [size]="14" strokeWidth="2"></svg>
+          </button>
+        }
+      </div>
 
       <!-- Search Results Dropdown -->
       <div
         data-lenis-prevent
-        class="absolute top-12 right-0 mt-2 max-h-[420px] w-80 overflow-y-auto z-40 bg-[#1a1a1a] shadow-2xl rounded-2xl text-white border border-white/10 transform transition-all duration-300 origin-top"
-        [class.scale-y-0]="!showResults()"
+        class="absolute top-12 right-0 max-h-[420px] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto z-40 bg-[#1a1a1a] shadow-2xl rounded-2xl text-white border border-white/10 transform transition-all duration-300 origin-top"
+        [class.scale-y-95]="!showResults()"
         [class.opacity-0]="!showResults()"
         [class.pointer-events-none]="!showResults()"
         [class.scale-y-100]="showResults()"
@@ -67,22 +103,39 @@
         [class.pointer-events-auto]="showResults()">
 
         @if (isSearching()) {
-          <p class="px-4 py-5 text-sm text-gray-400">Buscando…</p>
+          <div class="p-2 space-y-1">
+            @for (skeleton of [0, 1, 2]; track skeleton) {
+              <div class="flex items-center gap-3 p-2">
+                <div class="w-11 h-16 rounded-lg bg-white/5 animate-pulse shrink-0"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="h-3 w-3/4 rounded bg-white/5 animate-pulse"></div>
+                  <div class="h-2.5 w-1/3 rounded bg-white/5 animate-pulse"></div>
+                </div>
+              </div>
+            }
+          </div>
         } @else if (searchResults().length === 0) {
-          <p class="px-4 py-5 text-sm text-gray-400">Nenhum resultado encontrado.</p>
+          <p class="px-4 py-5 text-sm text-gray-400">
+            Nada encontrado para <span class="text-white">“{{ searchQuery() }}”</span>.
+          </p>
         } @else {
           <div class="p-2 space-y-1">
-            @for (result of searchResults(); track result.id) {
+            @for (result of searchResults(); track result.id; let i = $index) {
               <a
+                #resultItem
                 (mousedown)="navigateTo(result)"
-                class="group/item flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 transition duration-300 cursor-pointer">
+                (mouseenter)="activeIndex.set(i)"
+                class="group/item flex items-center gap-3 p-2 rounded-xl transition duration-300 cursor-pointer"
+                [ngClass]="i === activeIndex() ? 'bg-white/10' : ''">
                 <img
                   [src]="getResultImage(result)"
                   [alt]="getResultTitle(result)"
                   class="w-11 h-16 object-cover rounded-lg bg-[#111111] shrink-0"
                 />
                 <div class="min-w-0 flex-1">
-                  <h3 class="text-sm font-semibold text-white truncate transition duration-300 group-hover/item:text-red-500">
+                  <h3
+                    class="text-sm font-semibold truncate transition duration-300"
+                    [ngClass]="i === activeIndex() ? 'text-red-500' : 'text-white'">
                     {{ getResultTitle(result) }}
                   </h3>
                   <p class="mt-1 text-xs text-gray-400">
@@ -107,12 +160,63 @@
 
     <!-- Conta -->
     <a routerLink="/login"
-      class="px-5 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white transition duration-300">
+      class="hidden md:flex px-5 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white transition duration-300">
       Entrar
     </a>
     <a routerLink="/register"
-      class="px-6 py-2.5 rounded-full text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition duration-300 flex items-center">
+      class="hidden md:flex px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition duration-300 flex items-center whitespace-nowrap">
       Cadastrar
     </a>
   </div>
+  <!-- Sidebar (abaixo de md) -->
+  <div
+    class="md:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-opacity duration-300"
+    [class.opacity-0]="!sidebarOpen()"
+    [class.pointer-events-none]="!sidebarOpen()"
+    [class.opacity-100]="sidebarOpen()"
+    (click)="closeSidebar()">
+  </div>
+
+  <aside
+    class="md:hidden fixed top-0 left-0 h-full w-72 max-w-[80vw] z-50 flex flex-col bg-[#0d0d0d]/95 backdrop-blur-xl border-r border-white/5 transition-transform duration-300 ease-in-out"
+    [class.-translate-x-full]="!sidebarOpen()"
+    [class.translate-x-0]="sidebarOpen()">
+
+    <div class="flex items-center justify-between px-6 h-16">
+      <img src="/images/logo_bg_white_2.png" alt="Boxd" class="h-7 w-auto" />
+      <button
+        (click)="closeSidebar()"
+        class="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-gray-400 hover:text-white transition duration-300"
+        aria-label="Fechar menu">
+        <svg lucideX [size]="16" strokeWidth="2"></svg>
+      </button>
+    </div>
+
+    <nav data-lenis-prevent class="flex-1 px-6 pt-4 overflow-y-auto space-y-1">
+      <a routerLink="/" (click)="closeSidebar(); scrollToTop()"
+        routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item flex items-center px-4 py-3 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+        Home
+      </a>
+      <a routerLink="/movies" (click)="closeSidebar()" routerLinkActive="is-active"
+        class="nav-item flex items-center px-4 py-3 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+        Filmes
+      </a>
+      <a routerLink="/series" (click)="closeSidebar()" routerLinkActive="is-active"
+        class="nav-item flex items-center px-4 py-3 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition duration-300">
+        Séries
+      </a>
+    </nav>
+
+    <div class="px-6 pb-8 pt-6 space-y-3">
+      <a routerLink="/register" (click)="closeSidebar()"
+        class="w-full px-6 py-3 rounded-full transition duration-300 flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+        Cadastrar
+      </a>
+      <a routerLink="/login" (click)="closeSidebar()"
+        class="w-full px-6 py-3 rounded-full transition duration-300 flex items-center justify-center text-sm font-medium text-white bg-white/10 hover:bg-white/20">
+        Entrar
+      </a>
+    </div>
+  </aside>
 </nav>
