@@ -1,0 +1,54 @@
+/* A camada acompanha a altura do documento (o app-root é o bloco de
+   referência), então a fita é uma composição única ancorada às seções,
+   e não algo que se repete ou viaja.
+
+   Começa em 100vh, não em 0: o hero é opaco e ocupa exatamente a primeira
+   tela, então qualquer traçado ali seria desperdiçado. Assim o percurso
+   inteiro se distribui pela parte da página em que ele realmente aparece. */
+:host {
+  position: absolute;
+  top: 100vh;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  display: block;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ribbon {
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+  /* fade curto no topo (a fita surge logo abaixo do hero, como se viesse de
+     trás dele) e longo embaixo, para morrer suavemente no footer */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 3%,
+    #000 90%,
+    transparent 99%
+  );
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 3%, #000 90%, transparent 99%);
+}
+
+/* Tablet: o feixe já aperta sozinho (o viewBox é percentual),
+   então basta tirar um pouco de presença. */
+@media (max-width: 1023px) {
+  .ribbon {
+    opacity: 0.16;
+  }
+}
+
+/* Mobile: menos fios e mais discreto ainda. */
+@media (max-width: 639px) {
+  .ribbon {
+    opacity: 0.14;
+  }
+
+  .wire--3,
+  .wire--4 {
+    display: none;
+  }
+}
