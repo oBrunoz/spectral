@@ -1,0 +1,52 @@
+<div class="grid lg:grid-cols-3 gap-12">
+  <!-- Dados -->
+  <dl class="lg:col-span-2 grid sm:grid-cols-2 gap-x-10 gap-y-6">
+    @for (fact of facts; track fact.label) {
+      <div>
+        <dt class="text-gray-400 text-sm">{{ fact.label }}</dt>
+        <dd class="text-white mt-1">{{ fact.value }}</dd>
+      </div>
+    }
+
+    @if (nextEpisodeLabel) {
+      <div>
+        <dt class="text-gray-400 text-sm">Próximo episódio</dt>
+        <dd class="text-white mt-1">{{ nextEpisodeLabel }}</dd>
+      </div>
+    }
+  </dl>
+
+  <!-- Links e palavras-chave -->
+  <div class="space-y-8">
+    @if (externalLinks.length) {
+      <div>
+        <h3 class="text-gray-400 text-sm mb-3">Links</h3>
+        <div class="flex flex-wrap gap-3">
+          @for (link of externalLinks; track link.label) {
+            <a
+              [href]="link.url"
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-1.5 text-gray-400 hover:text-white transition duration-300 text-sm group">
+              {{ link.label }}
+              <svg lucideExternalLink [size]="13" strokeWidth="2" class="group-hover:text-red-500 transition duration-300"></svg>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+    @if (keywords.length) {
+      <div>
+        <h3 class="text-gray-400 text-sm mb-3">Palavras-chave</h3>
+        <div class="flex flex-wrap gap-2">
+          @for (keyword of keywords; track keyword.id) {
+            <span class="bg-white/10 border border-white/15 text-gray-200 text-xs px-3 py-1 rounded-full">
+              {{ keyword.name }}
+            </span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
