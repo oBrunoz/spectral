@@ -1,0 +1,39 @@
+<div>
+  @if (hasProviders) {
+    <div class="space-y-6">
+      @for (group of groups; track group.label) {
+        <div class="flex flex-wrap items-center gap-4">
+          <span class="text-gray-400 text-sm w-32 shrink-0">{{ group.label }}</span>
+          <div class="flex flex-wrap gap-3">
+            @for (provider of group.items; track provider.provider_id) {
+              <a
+                [href]="link"
+                target="_blank"
+                rel="noopener"
+                [title]="provider.provider_name"
+                class="block w-12 h-12 rounded-xl overflow-hidden bg-[#1a1a1a] transition duration-300 hover:scale-105">
+                <img
+                  [src]="logoUrl(provider)"
+                  [alt]="provider.provider_name"
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <a
+      [href]="link"
+      target="_blank"
+      rel="noopener"
+      class="inline-flex items-center gap-1 mt-8 text-gray-400 hover:text-white transition duration-300 text-sm group">
+      Ver opções no JustWatch
+      <svg lucideExternalLink [size]="14" strokeWidth="2" class="group-hover:text-red-500 transition duration-300"></svg>
+    </a>
+  } @else {
+    <p class="text-gray-400">Nenhuma opção de streaming disponível no Brasil no momento.</p>
+  }
+</div>
