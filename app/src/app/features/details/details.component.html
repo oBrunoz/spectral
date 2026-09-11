@@ -14,64 +14,156 @@
     [trailerUrl]="trailerUrl()">
   </app-hero-section>
 
-  <!-- Additional Content -->
-  <section id="more-content" class="py-16">
-    <div class="container mx-auto px-6">
-      @if (contentType() === 'movies' || contentType() === 'series') {
-        
-        @if (mappedCast().length > 0) {
-          <h2 class="text-3xl font-bold mb-8 text-white">Elenco</h2>
-          <app-carousel-row class="block mb-16">
-              @for (actor of mappedCast(); track actor.id) { 
-                <div class="flex-shrink-0 snap-start w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]">
-                  <app-cast-card [actor]="actor"></app-cast-card> 
-                </div>
-              }
-            
-          </app-carousel-row>
-        } @else if (isLoading()) {
-          <h2 class="text-3xl font-bold mb-8 text-white">Elenco</h2>
-          <div class="flex overflow-x-hidden gap-4 mb-16">
-            @for (item of skeletonCast; track $index) {
-              <div class="flex-shrink-0 bg-gray-800 rounded-lg p-2 animate-pulse aspect-[2/3] w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]"></div>
-            }
-          </div>
-        }
+  @if (contentType() === 'movies' || contentType() === 'series') {
 
-        @if (mappedSimilar().length > 0) {
-          <h2 class="text-3xl font-bold mb-8 text-white">Conteúdo similar</h2>
-          <app-carousel-row class="block mb-16">
-              @for (item of mappedSimilar(); track item.id) {
-                <div class="flex-shrink-0 snap-start w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]">
-                  <app-movie-card
-                    [id]="item.id"
-                    [title]="item.title"
-                    [posterPath]="item.posterPath"
-                    [year]="item.year"
-                    [rating]="item.rating"
-                    [mediaType]="item.mediaType"
-                  ></app-movie-card>
-                </div>
-              }
-            
-          </app-carousel-row>
-        } @else if (isLoading()) {
-          <h2 class="text-3xl font-bold mb-8 text-white">Conteúdo similar</h2>
-          <div class="flex overflow-x-hidden gap-4 mb-16">
-            @for (item of skeletonSimilar; track $index) {
-              <div class="flex-shrink-0 bg-gray-800 rounded-lg p-2 animate-pulse aspect-[2/3] w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]"></div>
-            }
-          </div>
-        }
-
-      } @else if (contentType() === 'people') {
-        <h2 class="text-3xl font-bold mb-8 text-white">Conhecido por</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          @for (item of skeletonCast; track $index) {
-            <div class="bg-gray-800 rounded-lg p-2 animate-pulse h-64"></div>
-          }
+    <!-- Onde assistir -->
+    @if (hasWatchProviders()) {
+      <section class="bg-[#0d0d0d] py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Onde assistir</h2>
+          <app-watch-providers [providers]="watchProviders()"></app-watch-providers>
         </div>
-      }
-    </div>
-  </section>
+      </section>
+    }
+
+    <!-- Ficha técnica -->
+    @if (details()) {
+      <section class="py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Ficha técnica</h2>
+          <app-content-facts
+            [details]="details()"
+            [type]="apiType()"
+            [certification]="certification()">
+          </app-content-facts>
+        </div>
+      </section>
+    }
+
+    <!-- Temporadas -->
+    @if (isSeries() && seasons().length > 0) {
+      <section class="bg-[#0d0d0d] py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Temporadas</h2>
+          <app-season-list [tvId]="details()!.id" [seasons]="seasons()"></app-season-list>
+        </div>
+      </section>
+    }
+
+    <!-- Elenco -->
+    @if (mappedCast().length > 0) {
+      <section class="py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Elenco</h2>
+          <app-carousel-row class="block">
+            @for (actor of mappedCast(); track actor.id) {
+              <div class="flex-shrink-0 snap-start w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]">
+                <app-cast-card [actor]="actor"></app-cast-card>
+              </div>
+            }
+          </app-carousel-row>
+        </div>
+      </section>
+    } @else if (isLoading()) {
+      <section class="py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Elenco</h2>
+          <div class="flex overflow-x-hidden gap-4">
+            @for (item of skeletonCast; track $index) {
+              <div class="flex-shrink-0 bg-[#1a1a1a] rounded-lg animate-pulse aspect-[2/3] w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]"></div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Mídia -->
+    @if (hasMedia()) {
+      <section class="bg-[#0d0d0d] py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Mídia</h2>
+          <app-media-gallery
+            [videos]="videos()"
+            [backdrops]="backdrops()"
+            [posters]="posters()">
+          </app-media-gallery>
+        </div>
+      </section>
+    }
+
+    <!-- Avaliações -->
+    @if (reviews().length > 0) {
+      <section class="py-16">
+        <div class="px-20">
+          <div class="flex items-baseline gap-3 mb-8">
+            <h2 class="text-3xl font-bold text-white">Avaliações</h2>
+            <span class="text-gray-400">{{ reviews().length }}</span>
+          </div>
+          <div class="grid md:grid-cols-2 gap-6 items-start">
+            @for (review of reviews().slice(0, 6); track review.id) {
+              <app-review-card [review]="review"></app-review-card>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Recomendações -->
+    @if (mappedRecommendations().length > 0) {
+      <section class="bg-[#0d0d0d] py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Recomendados para você</h2>
+          <app-carousel-row class="block">
+            @for (item of mappedRecommendations(); track item.id) {
+              <div class="flex-shrink-0 snap-start w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]">
+                <app-movie-card
+                  [id]="item.id"
+                  [title]="item.title"
+                  [posterPath]="item.posterPath"
+                  [year]="item.year"
+                  [rating]="item.rating"
+                  [mediaType]="item.mediaType"
+                ></app-movie-card>
+              </div>
+            }
+          </app-carousel-row>
+        </div>
+      </section>
+    }
+
+    <!-- Similares -->
+    @if (mappedSimilar().length > 0) {
+      <section class="py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Conteúdo similar</h2>
+          <app-carousel-row class="block">
+            @for (item of mappedSimilar(); track item.id) {
+              <div class="flex-shrink-0 snap-start w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]">
+                <app-movie-card
+                  [id]="item.id"
+                  [title]="item.title"
+                  [posterPath]="item.posterPath"
+                  [year]="item.year"
+                  [rating]="item.rating"
+                  [mediaType]="item.mediaType"
+                ></app-movie-card>
+              </div>
+            }
+          </app-carousel-row>
+        </div>
+      </section>
+    } @else if (isLoading()) {
+      <section class="py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Conteúdo similar</h2>
+          <div class="flex overflow-x-hidden gap-4">
+            @for (item of skeletonSimilar; track $index) {
+              <div class="flex-shrink-0 bg-[#1a1a1a] rounded-lg animate-pulse aspect-[2/3] w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]"></div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+  }
 </div>
