@@ -13,6 +13,7 @@ export interface CastMember {
 
 export interface Credits {
   cast: CastMember[];
+  crew?: CrewMember[];
 }
 
 export interface Movie {
@@ -72,6 +73,9 @@ export interface Video {
   name: string;
   site: string;
   type: string;
+  iso_639_1?: string;
+  official?: boolean;
+  published_at?: string;
 }
 
 export interface VideoResponse {
@@ -109,6 +113,32 @@ export interface ContentDetails {
   media_type?: string;
   credits?: Credits;
   similar?: TmdbListResponse<MediaResult>;
+  recommendations?: TmdbListResponse<MediaResult>;
+  videos?: VideoResponse;
+  images?: ImagesResponse;
+  reviews?: TmdbListResponse<Review>;
+  keywords?: KeywordsResponse;
+  external_ids?: ExternalIds;
+  release_dates?: ReleaseDatesResponse;
+  content_ratings?: ContentRatingsResponse;
+  'watch/providers'?: WatchProvidersResponse;
+
+  status?: string;
+  homepage?: string | null;
+  original_language?: string;
+  budget?: number;
+  revenue?: number;
+  production_companies?: ProductionCompany[];
+  belongs_to_collection?: BelongsToCollection | null;
+
+  networks?: Network[];
+  created_by?: CreatedBy[];
+  seasons?: Season[];
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+  in_production?: boolean;
+  last_episode_to_air?: Episode | null;
+  next_episode_to_air?: Episode | null;
 }
 
 export interface SpotlightData {
@@ -117,4 +147,134 @@ export interface SpotlightData {
   backgroundUrl: string;
   trailerUrl: string;
   logoUrl: string;
+}
+export interface CrewMember {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
+  profile_path: string | null;
+}
+
+export interface ProductionCompany {
+  id: number;
+  name: string;
+  logo_path: string | null;
+  origin_country: string;
+}
+
+export interface Network {
+  id: number;
+  name: string;
+  logo_path: string | null;
+  origin_country: string;
+}
+
+export interface Keyword {
+  id: number;
+  name: string;
+}
+
+export interface KeywordsResponse {
+  keywords?: Keyword[];
+  results?: Keyword[];
+}
+
+export interface ExternalIds {
+  imdb_id: string | null;
+  facebook_id: string | null;
+  instagram_id: string | null;
+  twitter_id: string | null;
+}
+
+export interface ReviewAuthor {
+  name: string;
+  username: string;
+  avatar_path: string | null;
+  rating: number | null;
+}
+
+export interface Review {
+  id: string;
+  author: string;
+  author_details: ReviewAuthor;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  url: string;
+}
+
+export interface WatchProvider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+  display_priority: number;
+}
+
+export interface WatchProviderCountry {
+  link: string;
+  flatrate?: WatchProvider[];
+  free?: WatchProvider[];
+  ads?: WatchProvider[];
+  rent?: WatchProvider[];
+  buy?: WatchProvider[];
+}
+
+export interface WatchProvidersResponse {
+  id: number;
+  results: Record<string, WatchProviderCountry>;
+}
+
+export interface Episode {
+  id: number;
+  name: string;
+  overview: string;
+  still_path: string | null;
+  air_date: string | null;
+  episode_number: number;
+  season_number: number;
+  runtime: number | null;
+  vote_average: number;
+}
+
+export interface Season {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  air_date: string | null;
+  season_number: number;
+  episode_count: number;
+  vote_average?: number;
+}
+
+export interface SeasonDetails extends Season {
+  episodes: Episode[];
+}
+
+export interface CreatedBy {
+  id: number;
+  name: string;
+  profile_path: string | null;
+}
+
+export interface BelongsToCollection {
+  id: number;
+  name: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+}
+
+export interface ReleaseDateEntry {
+  certification: string;
+  release_date: string;
+  type: number;
+}
+
+export interface ReleaseDatesResponse {
+  results: { iso_3166_1: string; release_dates: ReleaseDateEntry[] }[];
+}
+
+export interface ContentRatingsResponse {
+  results: { iso_3166_1: string; rating: string }[];
 }
