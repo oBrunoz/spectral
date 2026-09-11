@@ -1,0 +1,48 @@
+<article class="bg-[#1a1a1a] rounded-xl p-6 h-full flex flex-col">
+  <header class="flex items-center gap-3 mb-4">
+    @if (avatarUrl) {
+      <img
+        [src]="avatarUrl"
+        [alt]="review.author"
+        class="w-11 h-11 rounded-full object-cover bg-[#242424]"
+        loading="lazy"
+      />
+    } @else {
+      <div class="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold">
+        {{ initial }}
+      </div>
+    }
+
+    <div class="min-w-0">
+      <h3 class="text-white font-semibold text-sm truncate">{{ review.author }}</h3>
+      <p class="text-gray-400 text-xs">{{ review.created_at | date: 'dd MMM yyyy' }}</p>
+    </div>
+
+    @if (rating !== null) {
+      <span class="ml-auto bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 shrink-0">
+        <svg lucideStar [size]="11" strokeWidth="2" fill="currentColor"></svg>
+        {{ rating }}
+      </span>
+    }
+  </header>
+
+  <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-line flex-1">{{ visibleContent }}</p>
+
+  <footer class="flex items-center gap-4 mt-4">
+    @if (isLong) {
+      <button
+        type="button"
+        (click)="toggle()"
+        class="text-gray-400 hover:text-white transition duration-300 text-sm">
+        {{ isExpanded() ? 'Mostrar menos' : 'Ler review completa' }}
+      </button>
+    }
+    <a
+      [href]="review.url"
+      target="_blank"
+      rel="noopener"
+      class="ml-auto text-gray-400 hover:text-white transition duration-300 group">
+      <svg lucideExternalLink [size]="15" strokeWidth="2" class="group-hover:text-red-500 transition duration-300"></svg>
+    </a>
+  </footer>
+</article>
