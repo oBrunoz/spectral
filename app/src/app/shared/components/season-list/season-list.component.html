@@ -1,0 +1,76 @@
+<div class="space-y-3">
+  @for (season of orderedSeasons(); track season.id) {
+    <div class="bg-[#1a1a1a] rounded-xl overflow-hidden">
+      <button
+        type="button"
+        (click)="toggle(season)"
+        class="w-full flex items-center gap-5 p-4 text-left transition duration-300 hover:bg-white/5">
+        <img
+          [src]="posterUrl(season)"
+          [alt]="season.name"
+          class="w-16 aspect-[2/3] object-cover rounded-lg bg-[#242424] shrink-0"
+          loading="lazy"
+        />
+
+        <div class="min-w-0 flex-1">
+          <h3 class="text-white font-semibold">{{ season.name }}</h3>
+          <p class="text-gray-400 text-sm mt-1">
+            @if (year(season)) { <span>{{ year(season) }}</span> · }
+            <span>{{ season.episode_count }} episódio{{ season.episode_count === 1 ? '' : 's' }}</span>
+          </p>
+          @if (season.overview) {
+            <p class="text-gray-400 text-sm mt-2 line-clamp-2 hidden md:block">{{ season.overview }}</p>
+          }
+        </div>
+
+        <svg
+          lucideChevronDown
+          [size]="20"
+          strokeWidth="2"
+          class="text-gray-400 shrink-0 transition duration-300"
+          [class.rotate-180]="openSeason() === season.season_number">
+        </svg>
+      </button>
+
+      @if (openSeason() === season.season_number) {
+        <div class="border-t border-white/5 p-4">
+          @if (loadingSeason() === season.season_number) {
+            <div class="space-y-3">
+              @for (skeleton of [1, 2, 3]; track skeleton) {
+                <div class="h-20 bg-[#242424] rounded-lg animate-pulse"></div>
+              }
+            </div>
+          } @else if (episodesOf(season).length) {
+            <ul class="space-y-2">
+              @for (episode of episodesOf(season); track episode.id) {
+                <li class="flex gap-4 p-3 rounded-lg transition duration-300 hover:bg-white/5">
+                  <img
+                    [src]="stillUrl(episode)"
+                    [alt]="episode.name"
+                    class="w-32 aspect-video object-cover rounded-lg bg-[#242424] shrink-0 hidden sm:block"
+                    loading="lazy"
+                  />
+                  <div class="min-w-0">
+                    <h4 class="text-white text-sm font-medium">
+                      <span class="text-gray-500 mr-2">{{ episode.episode_number }}</span>
+                      {{ episode.name }}
+                    </h4>
+                    <p class="text-gray-500 text-xs mt-1">
+                      @if (episode.air_date) { <span>{{ episode.air_date | date: 'dd MMM yyyy' }}</span> }
+                      @if (episode.runtime) { <span> · {{ episode.runtime }} min</span> }
+                    </p>
+                    @if (episode.overview) {
+                      <p class="text-gray-400 text-sm mt-2 line-clamp-2">{{ episode.overview }}</p>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="text-gray-400 text-sm">Nenhum episódio cadastrado nesta temporada.</p>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
