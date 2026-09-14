@@ -13,7 +13,8 @@
       [tagline]="currentSpotlight?.details?.tagline ?? ''"
       [genres]="currentSpotlight?.details?.genres ?? []"
       [overview]="currentSpotlight?.movie?.overview ?? ''"
-      [trailerUrl]="currentSpotlight?.trailerUrl ?? '#'",
+      [trailerUrl]="currentSpotlight?.trailerUrl ?? '#'"
+      [detailsRoute]="spotlightDetailsRoute",
       (trailerOpened)="pauseAutoPlay()",
       (trailerClosed)="resumeAutoPlay()"
       (retryClicked)="retry()">

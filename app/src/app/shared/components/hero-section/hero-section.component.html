@@ -12,8 +12,7 @@
           [src]="backgroundUrl"
           [alt]="title"
           (load)="onBackgroundLoad()"
-          class="h-full w-full object-cover transition-opacity duration-1000 ease-in-out"
-          [class.opacity-0]="!isBgLoaded()"
+          class="h-full w-full object-cover transition-opacity duration-1000 ease-in-out opacity-0"
           [class.opacity-30]="isBgLoaded()"
         />
       }
@@ -152,6 +151,13 @@
               class="px-6 py-3 bg-gray-800 bg-opacity-80 text-white rounded-full hover:bg-gray-700 transition duration-300 flex items-center">
               <svg lucidePlus class="mr-1" [size]="16" strokeWidth="2"></svg> Adicionar à lista
             </button>
+            @if (detailsRoute) {
+              <a
+                [routerLink]="detailsRoute"
+                class="px-6 py-3 bg-white/10 text-white rounded-full hover:bg-white/20 transition duration-300 flex items-center">
+                <svg lucideInfo class="mr-1" [size]="16" strokeWidth="2"></svg> Ver detalhes
+              </a>
+            }
           </div>
         </div>
       </div>
@@ -160,9 +166,7 @@
 
   <!-- Trailer Container -->
   <div
-    class="absolute inset-0 w-full h-full transition-opacity duration-700 overflow-hidden"
-    [class.opacity-0]="!isTrailerVisible()"
-    [class.pointer-events-none]="!isTrailerVisible()"
+    class="absolute inset-0 w-full h-full transition-opacity duration-700 overflow-hidden opacity-0 pointer-events-none"
     [class.opacity-100]="isTrailerVisible()"
     [class.pointer-events-auto]="isTrailerVisible()">
 
@@ -179,8 +183,7 @@
       (click)="closeTrailer()">
 
       <div
-        class="flex flex-col items-center gap-2 transition-opacity duration-1000 pointer-events-none select-none bg-black bg-opacity-35 w-full h-full justify-center backdrop-blur-sm"
-        [class.opacity-0]="!isCloseHintVisible()"
+        class="flex flex-col items-center gap-2 transition-opacity duration-1000 pointer-events-none select-none bg-black bg-opacity-35 w-full h-full justify-center backdrop-blur-sm opacity-0"
         [class.opacity-100]="isCloseHintVisible()">
         <div class="rounded-full w-16 h-16 flex items-center justify-center">
           <svg lucidePause [size]="16" strokeWidth="3" fill="currentColor"></svg>

@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Genre } from '../../../core/models/tmdb.models';
 import {
   LucideTriangleAlert,
@@ -16,12 +17,13 @@ import {
   LucidePlay,
   LucidePlus,
   LucidePause,
+  LucideInfo,
 } from '@lucide/angular';
 
 @Component({
   selector: 'app-hero-section',
   standalone: true,
-  imports: [CommonModule, LucideTriangleAlert, LucideRotateCcw, LucideStar, LucidePlay, LucidePlus, LucidePause],
+  imports: [CommonModule, RouterModule, LucideTriangleAlert, LucideRotateCcw, LucideStar, LucidePlay, LucidePlus, LucidePause, LucideInfo],
   templateUrl: './hero-section.component.html',
   styleUrl: './hero-section.component.css'
 })
@@ -39,6 +41,8 @@ export class HeroSectionComponent {
   @Input() genres: Genre[] = [];
   @Input() overview = '';
   @Input() trailerUrl = '#';
+  
+  @Input() detailsRoute: unknown[] | null = null;
 
   @Output() retryClicked = new EventEmitter<void>();
   @Output() addToListClicked = new EventEmitter<void>();

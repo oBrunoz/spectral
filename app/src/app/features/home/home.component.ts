@@ -178,6 +178,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     return date ? String(new Date(date).getFullYear()) : '';
   }
 
+  get spotlightDetailsRoute(): unknown[] | null {
+    const id = this.currentSpotlight?.movie?.id;
+    return id ? ['/search', 'movies', id] : null;
+  }
+
   get currentSpotlight(): SpotlightData | undefined {
     return this.spotlights()[this.carouselCurrentIndex()];
   }
