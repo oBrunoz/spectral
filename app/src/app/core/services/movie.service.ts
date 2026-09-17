@@ -12,6 +12,8 @@ import {
   ContentDetails,
   MediaResult,
   SpotlightData,
+  Spotlight,
+  Genre,
   Review,
   SeasonDetails,
   WatchProviderCountry
@@ -219,5 +221,62 @@ export class MovieService {
         )
       )
     );
+  }
+
+  // Lista de gêneros
+  getGenres(type: 'movie' | 'tv'): Observable<Genre[]> {
+    return this.get<{ genres: Genre[] }>(`/genre/${type}/list`).pipe(
+      map((data) => data.genres ?? []),
+      catchError(() => of([]))
+    );
+  }
+
+  // Catálogo por gênero. Sem `genreId` devolve o populares geral.
+  discover<T>(
+    type: 'movie' | 'tv',
+    options: { genreId?: number | null; page?: number } = {}
+  ): Observable<TmdbListResponse<T>> {
+    const params: Record<string, any> = {
+      page: options.page ?? 1,
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 150,
+      include_adult: false,
+    };
+
+    if (options.genreId) params['with_genres'] = options.genreId;
+
+    return this.get<TmdbListResponse<T>>(`/discover/${type}`, params);
+  }
+
+  // Destaque de um título qualquer
+  getSpotlight(id: number, type: 'movie' | 'tv'): Observable<Spotlight> {
+    return this.getContentDetails(id, type).pipe(
+      map((details) => this.toGenericSpotlight(details, type))
+    );
+  }
+
+  // Monta o destaque a partir de um /movie/{id} ou /tv/{id}
+  private toGenericSpotlight(details: ContentDetails, type: 'movie' | 'tv'): Spotlight {
+    const images = details.images ?? ({ backdrops: [], posters: [], logos: [] } as ImagesResponse);
+    const trailer = (details.videos?.results ?? []).find(
+      (v) => v.site === 'YouTube' && v.type === 'Trailer'
+    );
+    const date = type === 'movie' ? details.release_date : details.first_air_date;
+
+    return {
+      id: details.id,
+      type,
+      title: details.title ?? details.name ?? '',
+      overview: details.overview ?? '',
+      voteAverage: details.vote_average ?? 0,
+      year: date ? String(new Date(date).getFullYear()) : '',
+      runtime: details.runtime ?? details.episode_run_time?.[0] ?? null,
+      details,
+      backgroundUrl: images.backdrops?.[0]
+        ? `${environment.tmdbImageUrl}/original${images.backdrops[0].file_path}`
+        : '/images/image_not_found.png',
+      logoUrl: this.pickLogoUrl(images),
+      trailerUrl: trailer ? `https://www.youtube.com/embed/${trailer.key}` : '#',
+    };
   }
 }
