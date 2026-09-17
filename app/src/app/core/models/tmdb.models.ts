@@ -278,3 +278,17 @@ export interface ReleaseDatesResponse {
 export interface ContentRatingsResponse {
   results: { iso_3166_1: string; rating: string }[];
 }
+
+export interface Spotlight {
+  id: number;
+  type: 'movie' | 'tv';
+  title: string;
+  overview: string;
+  voteAverage: number;
+  year: string;
+  runtime: number | null;
+  details: ContentDetails;
+  backgroundUrl: string;
+  logoUrl: string;
+  trailerUrl: string;
+}
