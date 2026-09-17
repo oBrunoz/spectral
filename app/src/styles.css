@@ -11,6 +11,31 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    animation: skeleton-sweep 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes skeleton-sweep {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 * {
@@ -73,6 +98,9 @@ html:not(.lenis) {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  .skeleton::after {
+    animation: none;
   }
 }
 
