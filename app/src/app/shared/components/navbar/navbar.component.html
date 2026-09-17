@@ -94,13 +94,8 @@
       <!-- Search Results Dropdown -->
       <div
         data-lenis-prevent
-        class="absolute top-12 right-0 max-h-[420px] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto z-40 bg-[#1a1a1a] shadow-2xl rounded-2xl text-white border border-white/10 transform transition-all duration-300 origin-top"
-        [class.scale-y-95]="!showResults()"
-        [class.opacity-0]="!showResults()"
-        [class.pointer-events-none]="!showResults()"
-        [class.scale-y-100]="showResults()"
-        [class.opacity-100]="showResults()"
-        [class.pointer-events-auto]="showResults()">
+        class="dropdown-panel absolute top-12 right-0 max-h-[420px] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto z-40 bg-[#1a1a1a] shadow-2xl rounded-2xl text-white border border-white/10"
+        [class.is-open]="showResults()">
 
         @if (isSearching()) {
           <div class="p-2 space-y-1">
