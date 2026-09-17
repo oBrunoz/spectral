@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, forkJoin, of, switchMap } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, forkJoin, of, switchMap, throwError } from 'rxjs';
+import { catchError, map, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   Movie,
@@ -29,6 +29,11 @@ export class MovieService {
 
   constructor(private http: HttpClient) {}
 
+  // Cache de leitura da TMDB
+  private readonly cache = new Map<string, { at: number; stream$: Observable<unknown> }>();
+  private readonly cacheTtl = 10 * 60 * 1000;
+  private readonly cacheMaxEntries = 150;
+
   private get<T>(endpoint: string, extraParams: Record<string, any> = {}): Observable<T> {
     let params = new HttpParams()
       .set('api_key', this.apiKey)
@@ -38,7 +43,40 @@ export class MovieService {
       params = params.set(key, String(value));
     });
 
-    return this.http.get<T>(`${this.baseUrl}${endpoint}`, { params });
+    const key = `${endpoint}?${params.keys().sort().map((k) => `${k}=${params.get(k)}`).join('&')}`;
+    const hit = this.cache.get(key);
+
+    if (hit && Date.now() - hit.at < this.cacheTtl) {
+      return hit.stream$ as Observable<T>;
+    }
+
+    const stream$ = this.http.get<T>(`${this.baseUrl}${endpoint}`, { params }).pipe(
+      catchError((err) => {
+        this.cache.delete(key);
+        return throwError(() => err);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+
+    this.cache.set(key, { at: Date.now(), stream$ });
+    this.pruneCache();
+
+    return stream$;
+  }
+
+  // Remove o que venceu e, se ainda estiver grande, as entradas mais antigas.
+  private pruneCache(): void {
+    const now = Date.now();
+
+    for (const [key, entry] of this.cache) {
+      if (now - entry.at >= this.cacheTtl) this.cache.delete(key);
+    }
+
+    while (this.cache.size > this.cacheMaxEntries) {
+      const oldest = this.cache.keys().next();
+      if (oldest.done) break;
+      this.cache.delete(oldest.value);
+    }
   }
 
   getPopularMovies(page = 1): Observable<TmdbListResponse<Movie>> {
@@ -234,13 +272,18 @@ export class MovieService {
   // Catálogo por gênero. Sem `genreId` devolve o populares geral.
   discover<T>(
     type: 'movie' | 'tv',
-    options: { genreId?: number | null; page?: number } = {}
+    options: {
+      genreId?: number | null;
+      page?: number;
+      params?: Record<string, string | number>;
+    } = {}
   ): Observable<TmdbListResponse<T>> {
     const params: Record<string, any> = {
       page: options.page ?? 1,
       sort_by: 'popularity.desc',
       'vote_count.gte': 150,
       include_adult: false,
+      ...options.params,
     };
 
     if (options.genreId) params['with_genres'] = options.genreId;
