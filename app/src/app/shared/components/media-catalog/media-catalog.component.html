@@ -1,0 +1,142 @@
+<div class="app">
+  // Barra de filtro
+  <div
+    class="fixed top-16 left-0 right-0 z-30 transition-all duration-300"
+    [ngClass]="isBarSolid() ? 'bg-[#111111]/90 backdrop-blur-md border-b border-white/5' : ''"
+    [class.-translate-y-full]="!isBarVisible()"
+    [class.opacity-0]="!isBarVisible()"
+    [class.pointer-events-none]="!isBarVisible()">
+    <div class="px-20 h-16 flex justify-between items-center gap-6">
+      <h2 class="text-xl font-bold text-white">{{ sectionTitle() }}</h2>
+
+      // Filtro de gênero
+      <div class="relative shrink-0">
+        <button
+          type="button"
+          (click)="toggleGenreMenu()"
+          class="px-6 py-2.5 bg-white/10 text-white rounded-full hover:bg-white/20 transition duration-300 flex items-center gap-2 text-sm"
+          [attr.aria-expanded]="isGenreMenuOpen()"
+          aria-haspopup="listbox">
+          {{ selectedGenre()?.name ?? 'Todos os gêneros' }}
+          <svg
+            lucideChevronDown
+            [size]="16"
+            strokeWidth="2"
+            class="transition-transform duration-300"
+            [class.rotate-180]="isGenreMenuOpen()"></svg>
+        </button>
+
+        <div
+          data-lenis-prevent
+          role="listbox"
+          class="absolute top-12 right-0 z-30 w-64 max-h-[380px] overflow-y-auto p-2 rounded-2xl bg-[#1a1a1a] border border-white/10 shadow-2xl origin-top transform transition-all duration-300"
+          [class.scale-y-95]="!isGenreMenuOpen()"
+          [class.opacity-0]="!isGenreMenuOpen()"
+          [class.pointer-events-none]="!isGenreMenuOpen()"
+          [class.scale-y-100]="isGenreMenuOpen()"
+          [class.opacity-100]="isGenreMenuOpen()">
+
+          <button
+            type="button"
+            role="option"
+            [attr.aria-selected]="selectedGenreId() === null"
+            (click)="selectGenre(null)"
+            class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-left transition duration-300 hover:bg-white/10"
+            [ngClass]="selectedGenreId() === null ? 'text-white' : 'text-gray-400'">
+            Todos os gêneros
+            @if (selectedGenreId() === null) {
+              <svg lucideCheck [size]="14" strokeWidth="2" class="shrink-0"></svg>
+            }
+          </button>
+
+          @for (genre of genres(); track genre.id) {
+            <button
+              type="button"
+              role="option"
+              [attr.aria-selected]="selectedGenreId() === genre.id"
+              (click)="selectGenre(genre.id)"
+              class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-left transition duration-300 hover:bg-white/10"
+              [ngClass]="selectedGenreId() === genre.id ? 'text-white' : 'text-gray-400'">
+              {{ genre.name }}
+              @if (selectedGenreId() === genre.id) {
+                <svg lucideCheck [size]="14" strokeWidth="2" class="shrink-0"></svg>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Destaque do gênero selecionado -->
+  <app-hero-section
+    [label]="selectedGenre()?.name ?? 'Em destaque'"
+    [title]="spotlight()?.title ?? ''"
+    [backgroundUrl]="spotlight()?.backgroundUrl ?? ''"
+    [logoUrl]="spotlight()?.logoUrl ?? ''"
+    [isLoading]="isLoadingSpotlight()"
+    [hasError]="hasError()"
+    [rating]="spotlight()?.voteAverage"
+    [releaseYear]="spotlight()?.year ?? ''"
+    [runtime]="spotlightRuntime"
+    [tagline]="spotlight()?.details?.tagline ?? ''"
+    [genres]="spotlight()?.details?.genres ?? []"
+    [overview]="spotlight()?.overview ?? ''"
+    [trailerUrl]="spotlight()?.trailerUrl ?? '#'"
+    [detailsRoute]="spotlightRoute"
+    (retryClicked)="retry()">
+  </app-hero-section>
+  <main id="content" class="pb-24">
+    <!-- Grid -->
+    <section class="px-20 pt-10">
+      @if (isLoading()) {
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          @for (item of skeletonItems; track $index) {
+            <div class="rounded-xl overflow-hidden shadow-lg">
+              <div class="aspect-[2/3] skeleton bg-[#1a1a1a]"></div>
+              <div class="p-3 bg-[#1a1a1a]">
+                <div class="h-4 skeleton bg-[#242424] rounded mb-2"></div>
+                <div class="h-3 skeleton bg-[#242424] rounded w-2/3"></div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (items().length === 0) {
+        <p class="text-gray-400">Nada por aqui ainda. Tente outro gênero.</p>
+      } @else {
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          @for (item of items(); track item.id) {
+            <app-movie-card
+              [id]="item.id"
+              [title]="getTitle(item)"
+              [posterPath]="item.poster_path"
+              [backdropPath]="item.backdrop_path"
+              [year]="getYear(item)"
+              [rating]="item.vote_average"
+              [overview]="item.overview"
+              [genreIds]="item.genre_ids ?? []"
+              [mediaType]="mediaType">
+            </app-movie-card>
+          }
+
+          @if (isLoadingMore()) {
+            @for (item of moreSkeletonItems; track $index) {
+              <div class="rounded-xl overflow-hidden shadow-lg">
+                <div class="aspect-[2/3] skeleton bg-[#1a1a1a]"></div>
+                <div class="p-3 bg-[#1a1a1a]">
+                  <div class="h-4 skeleton bg-[#242424] rounded mb-2"></div>
+                  <div class="h-3 skeleton bg-[#242424] rounded w-2/3"></div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Sentinela do scroll infinito -->
+        @if (canLoadMore()) {
+          <div #sentinel class="h-px w-full"></div>
+        }
+      }
+    </section>
+  </main>
+</div>
