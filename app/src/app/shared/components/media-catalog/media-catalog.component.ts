@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Subject, of } from 'rxjs';
+import { Subject, of, forkJoin } from 'rxjs';
 import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
 import { MovieService } from '../../../core/services/movie.service';
 import { MovieCardComponent } from '../movie-card/movie-card.component';
@@ -20,6 +20,7 @@ import { HeroSectionComponent } from '../hero-section/hero-section.component';
 import { Genre, Movie, TvShow, Spotlight } from '../../../core/models/tmdb.models';
 import { ShelfConfig, MOVIE_SHELVES, TV_SHELVES } from '../../../core/config/shelves';
 import { ContentShelfComponent } from '../content-shelf/content-shelf.component';
+import { NavigationStateService } from '../../../core/services/navigation-state.service';
 import { LucideChevronDown, LucideCheck } from '@lucide/angular';
 
 type CatalogItem = Movie & TvShow;
@@ -89,7 +90,8 @@ export class MediaCatalogComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private host: ElementRef<HTMLElement>,
-    private zone: NgZone
+    private zone: NgZone,
+    private navState: NavigationStateService
   ) {}
 
   /** Fecha o dropdown ao clicar fora dele. */
@@ -103,6 +105,12 @@ export class MediaCatalogComponent implements OnInit, OnDestroy {
 
   // A barra recua ao descer e volta ao subir. Sobre o hero ela fica sempre
   // visível e transparente; só ganha fundo quando passa a cobrir o grid.
+  /** Realinha o rastreamento com a posição real da janela e mostra a barra. */
+  private syncScrollState(): void {
+    this.lastScrollY = window.scrollY;
+    this.isBarVisible.set(true);
+  }
+
   @HostListener('window:scroll')
   onWindowScroll(): void {
     const y = window.scrollY;
@@ -140,6 +148,8 @@ export class MediaCatalogComponent implements OnInit, OnDestroy {
   canLoadMore = computed(() => this.page() < this.totalPages());
 
   ngOnInit(): void {
+    this.syncScrollState();
+
     this.movieService
       .getGenres(this.type)
       .pipe(takeUntil(this.destroy$))
@@ -149,6 +159,7 @@ export class MediaCatalogComponent implements OnInit, OnDestroy {
       const raw = params.get('genero');
       const genreId = raw ? Number(raw) : null;
       this.selectedGenreId.set(Number.isFinite(genreId) && genreId ? genreId : null);
+      this.syncScrollState();
       this.loadFirstPage();
     });
   }
@@ -186,6 +197,7 @@ export class MediaCatalogComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.items.update((current) => [...current, ...data.results]);
           this.page.set(data.page);
+          this.navState.savePages(this.router.url, data.page);
           this.isLoadingMore.set(false);
         },
         error: () => this.isLoadingMore.set(false),
@@ -197,24 +209,36 @@ export class MediaCatalogComponent implements OnInit, OnDestroy {
   }
 
   private loadFirstPage(): void {
+    const url = this.router.url;
+    const pagesToLoad = this.navState.isRestoring() ? this.navState.readPages(url) : 1;
+
     this.isLoading.set(true);
     this.isLoadingSpotlight.set(true);
     this.hasError.set(false);
     this.items.set([]);
     this.spotlight.set(null);
 
-    this.movieService
-      .discover<CatalogItem>(this.type, { genreId: this.selectedGenreId(), page: 1 })
+    const requests = Array.from({ length: pagesToLoad }, (_, i) =>
+      this.movieService.discover<CatalogItem>(this.type, {
+        genreId: this.selectedGenreId(),
+        page: i + 1,
+      })
+    );
+
+    forkJoin(requests)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap((data) => {
-          this.items.set(data.results);
-          this.page.set(data.page);
-          this.totalPages.set(Math.min(data.total_pages, 500));
+        switchMap((responses) => {
+          const first = responses[0];
+
+          this.items.set(responses.flatMap((r) => r.results));
+          this.page.set(responses.length);
+          this.totalPages.set(Math.min(first.total_pages, 500));
+          this.navState.savePages(url, responses.length);
           this.isLoading.set(false);
 
           // O destaque é o primeiro da lista — muda junto com o gênero.
-          const top = data.results[0];
+          const top = first.results[0];
           if (!top) return of(null);
 
           return this.movieService.getSpotlight(top.id, this.type).pipe(
