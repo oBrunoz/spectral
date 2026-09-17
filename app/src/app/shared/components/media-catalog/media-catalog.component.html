@@ -1,5 +1,5 @@
 <div class="app">
-  // Barra de filtro
+  <!-- Barra de filtro -->
   <div
     class="fixed top-16 left-0 right-0 z-30 transition-all duration-300"
     [ngClass]="isBarSolid() ? 'bg-[#111111]/90 backdrop-blur-md border-b border-white/5' : ''"
@@ -9,7 +9,7 @@
     <div class="px-20 h-16 flex justify-between items-center gap-6">
       <h2 class="text-xl font-bold text-white">{{ sectionTitle() }}</h2>
 
-      // Filtro de gênero
+      <!-- Filtro de gênero -->
       <div class="relative shrink-0">
         <button
           type="button"
@@ -68,7 +68,7 @@
     </div>
   </div>
 
-  <!-- Destaque do gênero selecionado -->
+  <!-- Destaque -->
   <app-hero-section
     [label]="selectedGenre()?.name ?? 'Em destaque'"
     [title]="spotlight()?.title ?? ''"
@@ -87,7 +87,7 @@
     (retryClicked)="retry()">
   </app-hero-section>
   <main id="content" class="pb-24">
-    <!-- Grid -->
+    <!-- Lista de itens -->
     <section class="px-20 pt-10">
       @if (isLoading()) {
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -132,7 +132,7 @@
           }
         </div>
 
-        <!-- Sentinela do scroll infinito -->
+        <!-- Sentinela -->
         @if (canLoadMore()) {
           <div #sentinel class="h-px w-full"></div>
         }
