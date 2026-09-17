@@ -18,6 +18,8 @@ import { MovieService } from '../../../core/services/movie.service';
 import { MovieCardComponent } from '../movie-card/movie-card.component';
 import { HeroSectionComponent } from '../hero-section/hero-section.component';
 import { Genre, Movie, TvShow, Spotlight } from '../../../core/models/tmdb.models';
+import { ShelfConfig, MOVIE_SHELVES, TV_SHELVES } from '../../../core/config/shelves';
+import { ContentShelfComponent } from '../content-shelf/content-shelf.component';
 import { LucideChevronDown, LucideCheck } from '@lucide/angular';
 
 type CatalogItem = Movie & TvShow;
@@ -31,6 +33,7 @@ type CatalogItem = Movie & TvShow;
     RouterModule,
     MovieCardComponent,
     HeroSectionComponent,
+    ContentShelfComponent,
     LucideChevronDown,
     LucideCheck,
   ],
@@ -118,6 +121,10 @@ export class MediaCatalogComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.isGenreMenuOpen.set(false);
+  }
+
+  get shelves(): ShelfConfig[] {
+    return this.type === 'movie' ? MOVIE_SHELVES : TV_SHELVES;
   }
 
   get mediaType(): 'movies' | 'series' {
