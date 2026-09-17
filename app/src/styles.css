@@ -17,6 +17,23 @@
     overflow: hidden;
   }
 
+  .dropdown-panel {
+    opacity: 0;
+    visibility: hidden;
+    transform: scaleY(0.95);
+    transform-origin: top;
+    pointer-events: none;
+    transition: opacity 300ms, transform 300ms, visibility 0s linear 300ms;
+  }
+
+  .dropdown-panel.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: scaleY(1);
+    pointer-events: auto;
+    transition: opacity 300ms, transform 300ms;
+  }
+
   .skeleton::after {
     content: '';
     position: absolute;
