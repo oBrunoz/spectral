@@ -58,7 +58,7 @@
           <app-carousel-row class="block">
             @for (actor of mappedCast(); track actor.id) {
               <div class="flex-shrink-0 snap-start w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]">
-                <app-cast-card [actor]="actor"></app-cast-card>
+                <app-cast-card [actor]="actor" (selected)="openPerson($event)"></app-cast-card>
               </div>
             }
           </app-carousel-row>
@@ -165,5 +165,9 @@
       </section>
     }
 
+  }
+
+  @if (selectedPersonId(); as personId) {
+    <app-person-modal [personId]="personId" (closed)="closePerson()"></app-person-modal>
   }
 </div>

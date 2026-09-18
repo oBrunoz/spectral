@@ -13,6 +13,7 @@ import { MovieService } from '../../core/services/movie.service';
 import { HeroSectionComponent } from '../../shared/components/hero-section/hero-section.component';
 import { MovieCardComponent } from '../../shared/components/movie-card/movie-card.component';
 import { CastCard, MappedCastMember } from '../../shared/components/cast-card/cast-card';
+import { PersonModalComponent } from '../../shared/components/person-modal/person-modal.component';
 import { CarouselRowComponent } from '../../shared/components/carousel-row/carousel-row.component';
 import { WatchProvidersComponent } from '../../shared/components/watch-providers/watch-providers.component';
 import { ContentFactsComponent } from '../../shared/components/content-facts/content-facts.component';
@@ -58,6 +59,7 @@ const REVIEWS_VAZIAS: TmdbListResponse<Review> = {
     HeroSectionComponent,
     MovieCardComponent,
     CastCard,
+    PersonModalComponent,
     CarouselRowComponent,
     WatchProvidersComponent,
     ContentFactsComponent,
@@ -78,6 +80,9 @@ export class DetailsComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
 
   skeletonCast = Array(6).fill(0);
+
+  /** Pessoa aberta no modal; `null` mantém o modal fora do DOM. */
+  selectedPersonId = signal<number | null>(null);
   skeletonSimilar = Array(6).fill(0);
 
   private destroy$ = new Subject<void>();
@@ -231,6 +236,14 @@ export class DetailsComponent implements OnInit, OnDestroy {
       this.backdrops().length > 0 ||
       this.posters().length > 0
   );
+
+  openPerson(personId: number): void {
+    this.selectedPersonId.set(personId);
+  }
+
+  closePerson(): void {
+    this.selectedPersonId.set(null);
+  }
 
   mappedCast = computed<MappedCastMember[]>(() => {
     const castList = this.details()?.credits?.cast || [];
