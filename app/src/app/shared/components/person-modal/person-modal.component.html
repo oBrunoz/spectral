@@ -39,10 +39,16 @@
     } @else {
       <div class="p-8">
         <div class="flex flex-col sm:flex-row gap-6">
-          <img
-            [src]="profileUrl"
-            [alt]="person()!.name"
-            class="w-40 shrink-0 aspect-[2/3] object-cover rounded-xl bg-[#242424]" />
+          @if (profileUrl) {
+            <img
+              [src]="profileUrl"
+              [alt]="person()!.name"
+              class="w-40 shrink-0 aspect-[2/3] object-cover rounded-xl bg-[#242424]" />
+          } @else {
+            <div class="w-40 shrink-0 aspect-[2/3] rounded-xl overflow-hidden">
+              <app-media-fallback kind="person" [label]="person()!.name"></app-media-fallback>
+            </div>
+          }
 
           <div class="flex-1 min-w-0">
             <h2 class="text-3xl font-bold text-white pr-12">{{ person()!.name }}</h2>
@@ -80,7 +86,7 @@
             -->
             @if (person()!.biography) {
               <div data-lenis-prevent class="mt-5 max-h-[7.1rem] overflow-y-auto pr-2">
-                <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                <p class="text-gray-300 text-sm text-justify leading-relaxed whitespace-pre-line">
                   {{ person()!.biography }}
                 </p>
               </div>

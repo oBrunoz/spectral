@@ -12,12 +12,16 @@
                 rel="noopener"
                 [title]="provider.provider_name"
                 class="block w-12 h-12 rounded-xl overflow-hidden bg-[#1a1a1a] transition duration-300 hover:scale-105">
-                <img
-                  [src]="logoUrl(provider)"
-                  [alt]="provider.provider_name"
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                @if (logoUrl(provider)) {
+                  <img
+                    [src]="logoUrl(provider)"
+                    [alt]="provider.provider_name"
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                } @else {
+                  <app-media-fallback kind="logo" [compact]="true"></app-media-fallback>
+                }
               </a>
             }
           </div>

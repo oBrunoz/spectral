@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideStar } from '@lucide/angular';
+import { MediaFallbackComponent } from '../media-fallback/media-fallback.component';
 
 const GENRE_MAP: Record<number, string> = {
   28: 'Ação', 12: 'Aventura', 16: 'Animação', 35: 'Comédia', 80: 'Crime',
@@ -14,7 +15,7 @@ const GENRE_MAP: Record<number, string> = {
 @Component({
   selector: 'app-movie-card',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideStar],
+  imports: [CommonModule, RouterModule, LucideStar, MediaFallbackComponent],
   templateUrl: './movie-card.component.html',
 })
 export class MovieCardComponent {
@@ -30,9 +31,7 @@ export class MovieCardComponent {
   @Input() hoverSide: 'left' | 'right' = 'right';
 
   get posterUrl(): string {
-    return this.posterPath
-      ? `https://image.tmdb.org/t/p/w342${this.posterPath}`
-      : '/images/image_not_found.png';
+    return this.posterPath ? `https://image.tmdb.org/t/p/w342${this.posterPath}` : '';
   }
 
   get backdropUrl(): string {

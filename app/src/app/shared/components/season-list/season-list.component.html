@@ -5,12 +5,18 @@
         type="button"
         (click)="toggle(season)"
         class="w-full flex items-center gap-5 p-4 text-left transition duration-300 hover:bg-white/5">
-        <img
-          [src]="posterUrl(season)"
-          [alt]="season.name"
-          class="w-16 aspect-[2/3] object-cover rounded-lg bg-[#242424] shrink-0"
-          loading="lazy"
-        />
+        @if (posterUrl(season)) {
+          <img
+            [src]="posterUrl(season)"
+            [alt]="season.name"
+            class="w-16 aspect-[2/3] object-cover rounded-lg bg-[#242424] shrink-0"
+            loading="lazy"
+          />
+        } @else {
+          <div class="w-16 aspect-[2/3] rounded-lg overflow-hidden shrink-0">
+            <app-media-fallback [compact]="true"></app-media-fallback>
+          </div>
+        }
 
         <div class="min-w-0 flex-1">
           <h3 class="text-white font-semibold">{{ season.name }}</h3>
@@ -44,12 +50,18 @@
             <ul class="space-y-2">
               @for (episode of episodesOf(season); track episode.id) {
                 <li class="flex gap-4 p-3 rounded-lg transition duration-300 hover:bg-white/5">
-                  <img
-                    [src]="stillUrl(episode)"
-                    [alt]="episode.name"
-                    class="w-32 aspect-video object-cover rounded-lg bg-[#242424] shrink-0 hidden sm:block"
-                    loading="lazy"
-                  />
+                  @if (stillUrl(episode)) {
+                    <img
+                      [src]="stillUrl(episode)"
+                      [alt]="episode.name"
+                      class="w-32 aspect-video object-cover rounded-lg bg-[#242424] shrink-0 hidden sm:block"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <div class="w-32 aspect-video rounded-lg overflow-hidden shrink-0 hidden sm:block">
+                      <app-media-fallback [compact]="true"></app-media-fallback>
+                    </div>
+                  }
                   <div class="min-w-0">
                     <h4 class="text-white text-sm font-medium">
                       <span class="text-gray-500 mr-2">{{ episode.episode_number }}</span>

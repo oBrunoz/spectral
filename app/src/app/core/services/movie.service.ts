@@ -256,9 +256,7 @@ export class MovieService {
     const ptLogo = logos.find((l) => l.iso_639_1 === 'pt');
     const enLogo = logos.find((l) => l.iso_639_1 === 'en');
     const logo = ptLogo ?? enLogo ?? logos[0];
-    return logo
-      ? `${environment.tmdbImageUrl}/original${logo.file_path}`
-      : '/images/image_not_found.png';
+    return logo ? `${environment.tmdbImageUrl}/original${logo.file_path}` : '';
   }
 
   getContentImages(id: number, type: 'movie' | 'tv'): Observable<ImagesResponse> {
@@ -292,8 +290,9 @@ export class MovieService {
     );
   }
 
+  // string vazia quando não há imagem: quem renderiza troca pelo app-media-fallback
   getImageUrl(path: string | null, size: string = 'w500'): string {
-    if (!path) return '/images/image_not_found.png';
+    if (!path) return '';
     return `${environment.tmdbImageUrl}/${size}${path}`;
   }
 
@@ -309,7 +308,7 @@ export class MovieService {
       details,
       backgroundUrl: images.backdrops?.[0]
         ? `${environment.tmdbImageUrl}/original${images.backdrops[0].file_path}`
-        : '/images/image_not_found.png',
+        : '',
       logoUrl: this.pickLogoUrl(images),
       trailerUrl: trailer ? `https://www.youtube.com/embed/${trailer.key}` : '#',
     };
@@ -396,7 +395,7 @@ export class MovieService {
       details,
       backgroundUrl: images.backdrops?.[0]
         ? `${environment.tmdbImageUrl}/original${images.backdrops[0].file_path}`
-        : '/images/image_not_found.png',
+        : '',
       logoUrl: this.pickLogoUrl(images),
       trailerUrl: trailer ? `https://www.youtube.com/embed/${trailer.key}` : '#',
     };

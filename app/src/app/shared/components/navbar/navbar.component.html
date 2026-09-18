@@ -122,11 +122,20 @@
                 (mouseenter)="activeIndex.set(i)"
                 class="group/item flex items-center gap-3 p-2 rounded-xl transition duration-300 cursor-pointer"
                 [ngClass]="i === activeIndex() ? 'bg-white/10' : ''">
-                <img
-                  [src]="getResultImage(result)"
-                  [alt]="getResultTitle(result)"
-                  class="w-11 h-16 object-cover rounded-lg bg-[#111111] shrink-0"
-                />
+                @if (getResultImage(result)) {
+                  <img
+                    [src]="getResultImage(result)"
+                    [alt]="getResultTitle(result)"
+                    class="w-11 h-16 object-cover rounded-lg bg-[#111111] shrink-0"
+                  />
+                } @else {
+                  <div class="w-11 h-16 rounded-lg overflow-hidden shrink-0">
+                    <app-media-fallback
+                      [kind]="result.media_type === 'person' ? 'person' : 'poster'"
+                      [compact]="true">
+                    </app-media-fallback>
+                  </div>
+                }
                 <div class="min-w-0 flex-1">
                   <h3
                     class="text-sm font-semibold truncate transition duration-300"

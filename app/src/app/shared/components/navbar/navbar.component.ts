@@ -19,11 +19,12 @@ import { MovieService } from '../../../core/services/movie.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { MediaResult } from '../../../core/models/tmdb.models';
 import { LucideSearch, LucideStar, LucideX } from '@lucide/angular';
+import { MediaFallbackComponent } from '../media-fallback/media-fallback.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LucideSearch, LucideStar, LucideX],
+  imports: [CommonModule, RouterModule, FormsModule, LucideSearch, LucideStar, LucideX, MediaFallbackComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
@@ -183,9 +184,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   getResultImage(result: any): string {
     const path = result.poster_path || result.profile_path || result.backdrop_path;
-    return path
-      ? `https://image.tmdb.org/t/p/w92${path}`
-      : '/images/image_not_found.png';
+    return path ? `https://image.tmdb.org/t/p/w92${path}` : '';
   }
 
   @HostListener('window:scroll')

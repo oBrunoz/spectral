@@ -8,6 +8,7 @@ import { MovieCardComponent } from '../../shared/components/movie-card/movie-car
 import { CarouselRowComponent } from '../../shared/components/carousel-row/carousel-row.component';
 import { PersonCredit, PersonDetails } from '../../core/models/tmdb.models';
 import { environment } from '../../../environments/environment';
+import { MediaFallbackComponent } from '../../shared/components/media-fallback/media-fallback.component';
 
 const DEPARTAMENTOS: Record<string, string> = {
   Acting: 'Atuação',
@@ -23,7 +24,7 @@ const DEPARTAMENTOS: Record<string, string> = {
 @Component({
   selector: 'app-person',
   standalone: true,
-  imports: [CommonModule, MovieCardComponent, CarouselRowComponent],
+  imports: [CommonModule, MovieCardComponent, CarouselRowComponent, MediaFallbackComponent],
   templateUrl: './person.component.html',
   styleUrls: ['./person.component.css'],
 })

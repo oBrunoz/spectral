@@ -5,11 +5,12 @@ import { catchError, takeUntil } from 'rxjs/operators';
 import { LucideChevronDown } from '@lucide/angular';
 import { Episode, Season } from '../../../core/models/tmdb.models';
 import { MovieService } from '../../../core/services/movie.service';
+import { MediaFallbackComponent } from '../media-fallback/media-fallback.component';
 
 @Component({
   selector: 'app-season-list',
   standalone: true,
-  imports: [CommonModule, LucideChevronDown],
+  imports: [CommonModule, LucideChevronDown, MediaFallbackComponent],
   templateUrl: './season-list.component.html',
 })
 export class SeasonListComponent implements OnDestroy {

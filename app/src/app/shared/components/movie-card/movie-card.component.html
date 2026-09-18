@@ -2,12 +2,16 @@
   class="group block rounded-xl overflow-hidden bg-[#1a1a1a] shadow-lg h-full">
 
   <div class="aspect-[2/3] relative overflow-hidden">
-    <img
-      [src]="posterUrl"
-      [alt]="title"
-      class="object-cover w-full h-full transition duration-500 group-hover:scale-105"
-      loading="lazy"
-    />
+    @if (posterUrl) {
+      <img
+        [src]="posterUrl"
+        [alt]="title"
+        class="object-cover w-full h-full transition duration-500 group-hover:scale-105"
+        loading="lazy"
+      />
+    } @else {
+      <app-media-fallback [label]="title"></app-media-fallback>
+    }
 
     <!-- escurece e revela as informações no hover -->
     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>

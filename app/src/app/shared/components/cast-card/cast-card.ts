@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CastMember } from '../../../core/models/tmdb.models';
+import { MediaFallbackComponent } from '../media-fallback/media-fallback.component';
 
 export interface MappedCastMember extends CastMember {
   profileUrl: string;
@@ -9,7 +10,7 @@ export interface MappedCastMember extends CastMember {
 @Component({
   selector: 'app-cast-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MediaFallbackComponent],
   templateUrl: './cast-card.html',
   styleUrl: './cast-card.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

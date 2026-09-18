@@ -19,11 +19,12 @@ import { MovieCardComponent } from '../movie-card/movie-card.component';
 import { CarouselRowComponent } from '../carousel-row/carousel-row.component';
 import { PersonDetails, PersonCredit } from '../../../core/models/tmdb.models';
 import { LucideArrowRight, LucideX } from '@lucide/angular';
+import { MediaFallbackComponent } from '../media-fallback/media-fallback.component';
 
 @Component({
   selector: 'app-person-modal',
   standalone: true,
-  imports: [CommonModule, RouterModule, MovieCardComponent, CarouselRowComponent, LucideX, LucideArrowRight],
+  imports: [CommonModule, RouterModule, MovieCardComponent, CarouselRowComponent, LucideX, LucideArrowRight, MediaFallbackComponent],
   templateUrl: './person-modal.component.html',
 })
 export class PersonModalComponent implements OnDestroy {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { LucideExternalLink } from '@lucide/angular';
 import { WatchProvider, WatchProviderCountry } from '../../../core/models/tmdb.models';
 import { environment } from '../../../../environments/environment';
+import { MediaFallbackComponent } from '../media-fallback/media-fallback.component';
 
 interface ProviderGroup {
   label: string;
@@ -12,7 +13,7 @@ interface ProviderGroup {
 @Component({
   selector: 'app-watch-providers',
   standalone: true,
-  imports: [CommonModule, LucideExternalLink],
+  imports: [CommonModule, LucideExternalLink, MediaFallbackComponent],
   templateUrl: './watch-providers.component.html',
 })
 export class WatchProvidersComponent {
@@ -42,6 +43,6 @@ export class WatchProvidersComponent {
   logoUrl(provider: WatchProvider): string {
     return provider.logo_path
       ? `${environment.tmdbImageUrl}/w154${provider.logo_path}`
-      : '/images/image_not_found.png';
+      : '';
   }
 }
