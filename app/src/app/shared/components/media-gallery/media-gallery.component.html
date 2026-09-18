@@ -14,18 +14,20 @@
       }
     </div>
 
-    @switch (resolvedTab()) {
-      @case ('videos') {
+    <!-- painel de altura fixa: a página não estica com dezenas de itens -->
+    <div class="media-scroll" data-lenis-prevent>
+
+      @if (resolvedTab() === 'videos') {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          @for (video of playableVideos(); track video.id) {
+          @for (item of items(); track item.id) {
             <button
               type="button"
-              (click)="openVideo(video)"
+              (click)="open($index)"
               class="group text-left rounded-xl overflow-hidden bg-[#1a1a1a]">
               <div class="relative aspect-video overflow-hidden">
                 <img
-                  [src]="thumbUrl(video)"
-                  [alt]="video.name"
+                  [src]="item.thumb"
+                  [alt]="item.title"
                   class="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
@@ -37,24 +39,27 @@
                 </div>
               </div>
               <div class="p-3">
-                <h3 class="text-white text-sm font-medium truncate">{{ video.name }}</h3>
-                <p class="text-gray-400 text-xs mt-1">{{ video.type }}</p>
+                <h3 class="text-white text-sm font-medium truncate">{{ item.title }}</h3>
+                <p class="text-gray-400 text-xs mt-1">{{ item.subtitle }}</p>
               </div>
             </button>
           }
         </div>
-      }
-
-      @case ('backdrops') {
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          @for (image of visibleBackdrops(); track image.file_path) {
+      } @else {
+        <div
+          [ngClass]="resolvedTab() === 'posters'
+            ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6'
+            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'"
+          class="grid gap-4">
+          @for (item of items(); track item.id) {
             <button
               type="button"
-              (click)="openImage(image)"
-              class="group rounded-xl overflow-hidden bg-[#1a1a1a] aspect-video">
+              (click)="open($index)"
+              [ngClass]="resolvedTab() === 'posters' ? 'aspect-[2/3]' : 'aspect-video'"
+              class="group rounded-xl overflow-hidden bg-[#1a1a1a]">
               <img
-                [src]="imageUrl(image, 'w780')"
-                alt="Imagem do conteúdo"
+                [src]="item.thumb"
+                alt=""
                 class="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                 loading="lazy"
               />
@@ -63,51 +68,114 @@
         </div>
       }
 
-      @case ('posters') {
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
-          @for (image of visiblePosters(); track image.file_path) {
-            <button
-              type="button"
-              (click)="openImage(image)"
-              class="group rounded-xl overflow-hidden bg-[#1a1a1a] aspect-[2/3]">
-              <img
-                [src]="imageUrl(image, 'w342')"
-                alt="Pôster do conteúdo"
-                class="w-full h-full object-cover transition duration-500 group-hover:scale-105"
-                loading="lazy"
-              />
-            </button>
-          }
-        </div>
-      }
-    }
+    </div>
   </div>
 
   <!-- Lightbox -->
-  @if (openVideoKey() || openImageUrl()) {
+  @if (currentItem(); as item) {
     <div
       data-lenis-prevent
-      class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6"
-      (click)="closeOverlay()">
-      <button
-        type="button"
-        class="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition duration-300"
-        aria-label="Fechar">
-        <svg lucideX [size]="22" strokeWidth="2"></svg>
-      </button>
+      class="fixed inset-0 z-50 bg-black/95 flex flex-col"
+      (click)="close()"
+      (touchstart)="onTouchStart($event)"
+      (touchend)="onTouchEnd($event)">
 
-      <div class="w-full max-w-full" (click)="$event.stopPropagation()">
-        @if (openVideoKey()) {
-          <iframe
-            class="overlay-frame rounded-xl w-full"
-            [src]="safeEmbedUrl"
-            allow="autoplay; encrypted-media"
-            allowfullscreen>
-          </iframe>
+      <!-- Barra superior -->
+      <div
+        class="flex items-center justify-between gap-4 px-6 py-4 shrink-0"
+        (click)="$event.stopPropagation()">
+        <div class="min-w-0">
+          @if (item.title) {
+            <h3 class="text-white text-sm font-medium truncate">{{ item.title }}</h3>
+          }
+          <p class="text-gray-400 text-xs mt-0.5">
+            {{ openIndex()! + 1 }} de {{ items().length }}
+            @if (item.subtitle) { <span class="text-gray-500"> · {{ item.subtitle }}</span> }
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          @if (item.kind === 'video') {
+            <a
+              [href]="youtubeUrl()"
+              target="_blank"
+              rel="noopener"
+              class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm transition duration-300 items-center gap-2 hidden sm:flex">
+              <svg lucideExternalLink [size]="14" strokeWidth="2"></svg> YouTube
+            </a>
+          } @else {
+            <a
+              [href]="item.full"
+              target="_blank"
+              rel="noopener"
+              class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm transition duration-300 items-center gap-2 hidden sm:flex">
+              <svg lucideExternalLink [size]="14" strokeWidth="2"></svg> Tamanho original
+            </a>
+          }
+          <button
+            type="button"
+            (click)="close()"
+            class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition duration-300"
+            aria-label="Fechar">
+            <svg lucideX [size]="22" strokeWidth="2"></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Palco -->
+      <div class="flex-1 min-h-0 flex items-center justify-center px-4 sm:px-20 relative">
+        @if (items().length > 1) {
+          <button
+            type="button"
+            (click)="$event.stopPropagation(); step(-1)"
+            class="absolute left-2 sm:left-6 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition duration-300"
+            aria-label="Anterior">
+            <svg lucideChevronLeft [size]="24" strokeWidth="2"></svg>
+          </button>
+          <button
+            type="button"
+            (click)="$event.stopPropagation(); step(1)"
+            class="absolute right-2 sm:right-6 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition duration-300"
+            aria-label="Próximo">
+            <svg lucideChevronRight [size]="24" strokeWidth="2"></svg>
+          </button>
+        }
+
+        @if (item.kind === 'video') {
+          <div class="stage-video" (click)="$event.stopPropagation()">
+            <iframe
+              [src]="safeEmbedUrl()"
+              allow="autoplay; encrypted-media"
+              allowfullscreen>
+            </iframe>
+          </div>
         } @else {
-          <img [src]="openImageUrl()" alt="" class="w-full max-h-[85vh] object-contain rounded-xl max-w-full" />
+          <img
+            [src]="item.full"
+            alt=""
+            class="stage-image rounded-xl"
+            (click)="$event.stopPropagation()"
+          />
         }
       </div>
+
+      <!-- Miniaturas -->
+      @if (items().length > 1) {
+        <div
+          data-lenis-prevent
+          class="shrink-0 flex gap-2 overflow-x-auto px-6 py-4 thumb-strip"
+          (click)="$event.stopPropagation()">
+          @for (thumb of items(); track thumb.id) {
+            <button
+              type="button"
+              (click)="open($index)"
+              [ngClass]="$index === openIndex() ? 'opacity-100 ring-2 ring-white' : 'opacity-50 hover:opacity-100'"
+              class="shrink-0 h-14 rounded-lg overflow-hidden bg-[#1a1a1a] transition duration-300">
+              <img [src]="thumb.thumb" alt="" class="h-full w-auto object-cover" loading="lazy" />
+            </button>
+          }
+        </div>
+      }
     </div>
   }
 }
