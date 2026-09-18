@@ -10,6 +10,7 @@ import {
   computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Subject, of } from 'rxjs';
 import { switchMap, takeUntil, catchError } from 'rxjs/operators';
 import { MovieService } from '../../../core/services/movie.service';
@@ -17,15 +18,12 @@ import { SmoothScrollService } from '../../../core/services/smooth-scroll.servic
 import { MovieCardComponent } from '../movie-card/movie-card.component';
 import { CarouselRowComponent } from '../carousel-row/carousel-row.component';
 import { PersonDetails, PersonCredit } from '../../../core/models/tmdb.models';
-import { LucideX } from '@lucide/angular';
-
-/** Talk show, jornalismo e reality: aparições, não trabalhos. */
-const NON_ROLE_GENRES = new Set([10767, 10763, 10764]);
+import { LucideArrowRight, LucideX } from '@lucide/angular';
 
 @Component({
   selector: 'app-person-modal',
   standalone: true,
-  imports: [CommonModule, MovieCardComponent, CarouselRowComponent, LucideX],
+  imports: [CommonModule, RouterModule, MovieCardComponent, CarouselRowComponent, LucideX, LucideArrowRight],
   templateUrl: './person-modal.component.html',
 })
 export class PersonModalComponent implements OnDestroy {
@@ -81,19 +79,9 @@ export class PersonModalComponent implements OnDestroy {
     return this.movieService.getImageUrl(this.person()?.profile_path ?? null, 'w342');
   }
 
-  /**
-   * Filmografia ordenada por número de votos, não por popularidade: popularidade
-   * na TMDB reflete acesso recente, e sobe talk show à frente de filme premiado.
-   */
-  knownFor = computed<PersonCredit[]>(() => {
-    const credits = this.person()?.combined_credits?.cast ?? [];
-
-    return credits
-      .filter((c) => !(c.genre_ids ?? []).some((id) => NON_ROLE_GENRES.has(id)))
-      .filter((c) => c.poster_path)
-      .sort((a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0))
-      .slice(0, 15);
-  });
+  knownFor = computed<PersonCredit[]>(() =>
+    this.movieService.getPersonCredits(this.person()).slice(0, 15)
+  );
 
   /** Idade atual, ou idade com que morreu. */
   age = computed<number | null>(() => {
@@ -136,5 +124,10 @@ export class PersonModalComponent implements OnDestroy {
 
   getCreditMediaType(credit: PersonCredit): 'movies' | 'series' {
     return credit.media_type === 'tv' ? 'series' : 'movies';
+  }
+
+  // personagem para elenco, função para quem estava atrás da câmera
+  getCreditRole(credit: PersonCredit): string {
+    return credit.character || credit.job || '';
   }
 }

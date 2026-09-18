@@ -27,6 +27,11 @@ export const routes: Routes = [
       import('./features/register/register.component').then((m) => m.RegisterComponent),
   },
   {
+    path: 'search/people/:id',
+    loadComponent: () =>
+      import('./features/person/person.component').then((m) => m.PersonComponent),
+  },
+  {
     path: 'search/:content_type/:id',
     loadComponent: () =>
       import('./features/details/details.component').then((m) => m.DetailsComponent),

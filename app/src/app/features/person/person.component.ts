@@ -1,0 +1,150 @@
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { Subject, of } from 'rxjs';
+import { catchError, switchMap, takeUntil } from 'rxjs/operators';
+import { MovieService } from '../../core/services/movie.service';
+import { MovieCardComponent } from '../../shared/components/movie-card/movie-card.component';
+import { CarouselRowComponent } from '../../shared/components/carousel-row/carousel-row.component';
+import { PersonCredit, PersonDetails } from '../../core/models/tmdb.models';
+import { environment } from '../../../environments/environment';
+
+const DEPARTAMENTOS: Record<string, string> = {
+  Acting: 'Atuação',
+  Directing: 'Direção',
+  Writing: 'Roteiro',
+  Production: 'Produção',
+  Sound: 'Som',
+  Camera: 'Fotografia',
+  Editing: 'Montagem',
+  Art: 'Direção de arte',
+};
+
+@Component({
+  selector: 'app-person',
+  standalone: true,
+  imports: [CommonModule, MovieCardComponent, CarouselRowComponent],
+  templateUrl: './person.component.html',
+  styleUrls: ['./person.component.css'],
+})
+export class PersonComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private movieService = inject(MovieService);
+
+  person = signal<PersonDetails | null>(null);
+  isLoading = signal(true);
+  bioExpanded = signal(false);
+
+  skeletonCards = Array(6).fill(0);
+
+  private destroy$ = new Subject<void>();
+
+  ngOnInit(): void {
+    this.route.params
+      .pipe(
+        switchMap((params) => {
+          this.isLoading.set(true);
+          this.person.set(null);
+          this.bioExpanded.set(false);
+          return this.movieService
+            .getPersonDetails(Number(params['id']))
+            .pipe(catchError(() => of(null)));
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((person) => {
+        this.person.set(person);
+        this.isLoading.set(false);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  profileUrl = computed(() =>
+    this.movieService.getImageUrl(this.person()?.profile_path ?? null, 'h632')
+  );
+
+  // atuação e ofício técnico no mesmo balaio, já ordenados
+  credits = computed<PersonCredit[]>(() => this.movieService.getPersonCredits(this.person()));
+
+  knownFor = computed(() => this.credits().slice(0, 20));
+
+  // o fundo do hero vem do título mais conhecido da pessoa
+  backdropUrl = computed(() => {
+    const comBackdrop = this.credits().find((c) => c.backdrop_path);
+    return comBackdrop
+      ? `${environment.tmdbImageUrl}/original${comBackdrop.backdrop_path}`
+      : '';
+  });
+
+  role = computed(() => {
+    const dept = this.person()?.known_for_department;
+    return dept ? DEPARTAMENTOS[dept] ?? dept : '';
+  });
+
+  // idade atual, ou idade com que morreu
+  age = computed<number | null>(() => {
+    const birthday = this.person()?.birthday;
+    if (!birthday) return null;
+
+    const fim = this.person()?.deathday ? new Date(this.person()!.deathday!) : new Date();
+    const nascimento = new Date(birthday);
+
+    let anos = fim.getFullYear() - nascimento.getFullYear();
+    const meses = fim.getMonth() - nascimento.getMonth();
+    if (meses < 0 || (meses === 0 && fim.getDate() < nascimento.getDate())) anos--;
+
+    return anos;
+  });
+
+  titleCount = computed(() => this.credits().length);
+
+  // primeiro e último ano creditados
+  careerSpan = computed<string>(() => {
+    const anos = this.credits()
+      .map((c) => c.release_date || c.first_air_date)
+      .filter((data): data is string => !!data)
+      .map((data) => new Date(data).getFullYear())
+      .filter((ano) => !Number.isNaN(ano));
+
+    if (!anos.length) return '';
+    const inicio = Math.min(...anos);
+    const fim = Math.max(...anos);
+    return inicio === fim ? String(inicio) : `${inicio} – ${fim}`;
+  });
+
+  // média das notas dos títulos já avaliados
+  averageRating = computed<number | null>(() => {
+    const notas = this.credits()
+      .filter((c) => (c.vote_count ?? 0) > 0 && c.vote_average > 0)
+      .map((c) => c.vote_average);
+
+    if (!notas.length) return null;
+    return notas.reduce((soma, nota) => soma + nota, 0) / notas.length;
+  });
+
+  toggleBio(): void {
+    this.bioExpanded.update((v) => !v);
+  }
+
+  creditTitle(credit: PersonCredit): string {
+    return credit.title ?? credit.name ?? '';
+  }
+
+  creditYear(credit: PersonCredit): string {
+    const data = credit.release_date || credit.first_air_date;
+    return data ? String(new Date(data).getFullYear()) : '';
+  }
+
+  creditMediaType(credit: PersonCredit): 'movies' | 'series' {
+    return credit.media_type === 'tv' ? 'series' : 'movies';
+  }
+
+  // personagem para elenco, função para quem estava atrás da câmera
+  creditRole(credit: PersonCredit): string {
+    return credit.character || credit.job || '';
+  }
+}

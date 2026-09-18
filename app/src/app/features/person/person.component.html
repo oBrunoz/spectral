@@ -1,0 +1,178 @@
+<div>
+  <!-- Cabeçalho -->
+  <section class="relative overflow-hidden bg-black rounded-b-[2rem] border-b border-white/10 hero-edge">
+
+    <!-- fundo: cena do título mais conhecido -->
+    <div class="absolute inset-0">
+      <div class="absolute inset-0 bg-black bg-opacity-60">
+        @if (backdropUrl()) {
+          <img
+            [src]="backdropUrl()"
+            alt=""
+            class="h-full w-full object-cover opacity-20"
+          />
+        }
+      </div>
+    </div>
+
+    <!-- vinheta -->
+    <div
+      class="absolute inset-0 pointer-events-none"
+      style="background: radial-gradient(ellipse at center, transparent 75%, rgba(0, 0, 0, 0.397) 100%); z-index: 11;">
+    </div>
+
+    <!-- fade -->
+    <div
+      class="absolute bottom-0 left-0 right-0 h-56 pointer-events-none"
+      style="background: linear-gradient(to bottom, transparent, rgba(17,17,17,0.92)); z-index: 11;">
+    </div>
+
+    <div class="px-20 relative z-20 pt-40 pb-16">
+      @if (isLoading()) {
+        <div class="flex flex-col md:flex-row gap-12 animate-pulse">
+          <div class="skeleton bg-[#242424] w-64 aspect-[2/3] rounded-2xl shrink-0"></div>
+          <div class="flex-1 space-y-6 pt-4">
+            <div class="skeleton bg-[#242424] w-32 h-7 rounded-full"></div>
+            <div class="skeleton bg-[#242424] h-14 w-3/5 rounded"></div>
+            <div class="skeleton bg-[#242424] h-5 w-2/5 rounded"></div>
+            <div class="flex gap-12 pt-4">
+              <div class="skeleton bg-[#242424] h-12 w-24 rounded"></div>
+              <div class="skeleton bg-[#242424] h-12 w-32 rounded"></div>
+              <div class="skeleton bg-[#242424] h-12 w-20 rounded"></div>
+            </div>
+          </div>
+        </div>
+      } @else if (person(); as person) {
+        <div class="flex flex-col md:flex-row gap-12 items-start">
+          <img
+            [src]="profileUrl()"
+            [alt]="person.name"
+            class="w-64 shrink-0 aspect-[2/3] object-cover rounded-2xl bg-[#1a1a1a] shadow-2xl"
+          />
+
+          <div class="flex-1 min-w-0 space-y-6">
+            <div>
+              <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm">Pessoa</span>
+              <h1 class="text-5xl md:text-6xl font-bold mt-4 leading-tight text-white">
+                {{ person.name }}
+              </h1>
+            </div>
+
+            <div class="flex items-center flex-wrap gap-x-4 text-white [&>*+*]:before:content-['•'] [&>*+*]:before:pr-4 [&>*+*]:before:text-gray-300">
+              @if (role()) {
+                <span>{{ role() }}</span>
+              }
+              @if (person.birthday) {
+                <span>
+                  {{ person.birthday | date: "d 'de' MMMM 'de' y" }}
+                  @if (age() !== null && !person.deathday) {
+                    <span class="text-gray-400">({{ age() }} anos)</span>
+                  }
+                </span>
+              }
+              @if (person.deathday) {
+                <span>
+                  Falecido em {{ person.deathday | date: "d 'de' MMMM 'de' y" }}
+                  @if (age() !== null) {
+                    <span class="text-gray-400">(aos {{ age() }})</span>
+                  }
+                </span>
+              }
+              @if (person.place_of_birth) {
+                <span class="text-gray-300">{{ person.place_of_birth }}</span>
+              }
+            </div>
+
+            <!-- a carreira resumida em três números -->
+            @if (titleCount() > 0) {
+              <div class="flex flex-wrap gap-x-16 gap-y-6 pt-2">
+                <div>
+                  <p class="text-3xl font-bold text-white">{{ titleCount() }}</p>
+                  <p class="text-gray-400 text-sm mt-1">
+                    {{ titleCount() === 1 ? 'título creditado' : 'títulos creditados' }}
+                  </p>
+                </div>
+                @if (careerSpan()) {
+                  <div>
+                    <p class="text-3xl font-bold text-white">{{ careerSpan() }}</p>
+                    <p class="text-gray-400 text-sm mt-1">de carreira</p>
+                  </div>
+                }
+                @if (averageRating() !== null) {
+                  <div>
+                    <p class="text-3xl font-bold text-yellow-400">{{ averageRating()!.toFixed(1) }}</p>
+                    <p class="text-gray-400 text-sm mt-1">nota média dos títulos</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="py-20 text-center">
+          <h1 class="text-3xl font-bold text-white mb-3">Pessoa não encontrada</h1>
+          <p class="text-gray-400">Não foi possível carregar os dados desta pessoa.</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (person(); as person) {
+    <!-- Biografia -->
+    @if (person.biography) {
+      <section class="bg-[#0d0d0d] py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Biografia</h2>
+          <p
+            class="text-gray-300 leading-relaxed whitespace-pre-line max-w-4xl"
+            [class.line-clamp-6]="!bioExpanded()">
+            {{ person.biography }}
+          </p>
+          <button
+            type="button"
+            (click)="toggleBio()"
+            class="mt-6 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-300 flex items-center text-sm">
+            {{ bioExpanded() ? 'Ler menos' : 'Ler mais' }}
+          </button>
+        </div>
+      </section>
+    }
+
+    <!-- Conhecido por -->
+    @if (knownFor().length > 0) {
+      <section class="py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Conhecido por</h2>
+          <app-carousel-row class="block">
+            @for (credit of knownFor(); track credit.media_type + credit.id) {
+              <div class="flex-shrink-0 snap-start w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]">
+                <app-movie-card
+                  [id]="credit.id"
+                  [title]="creditTitle(credit)"
+                  [posterPath]="credit.poster_path"
+                  [year]="creditYear(credit)"
+                  [rating]="credit.vote_average"
+                  [mediaType]="creditMediaType(credit)">
+                </app-movie-card>
+                @if (creditRole(credit)) {
+                  <p class="text-gray-400 text-sm mt-2 line-clamp-1">{{ creditRole(credit) }}</p>
+                }
+              </div>
+            }
+          </app-carousel-row>
+        </div>
+      </section>
+    }
+  } @else if (isLoading()) {
+    <section class="py-16">
+      <div class="px-20">
+        <h2 class="text-3xl font-bold mb-8 text-white">Conhecido por</h2>
+        <div class="flex overflow-x-hidden gap-4">
+          @for (item of skeletonCards; track $index) {
+            <div class="flex-shrink-0 bg-[#1a1a1a] rounded-lg animate-pulse aspect-[2/3] w-[calc(50%-0.5rem)] sm:w-[calc(33.3333%-0.6666rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.6666%-0.8333rem)]"></div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+</div>

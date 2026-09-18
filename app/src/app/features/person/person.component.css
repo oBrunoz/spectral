@@ -1,0 +1,4 @@
+/* mesma borda de sombra do hero da home */
+.hero-edge {
+  box-shadow: 0 20px 32px 0 rgba(0, 0, 0, 0.45);
+}

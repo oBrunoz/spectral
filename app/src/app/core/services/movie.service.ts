@@ -17,8 +17,12 @@ import {
   Review,
   SeasonDetails,
   WatchProviderCountry,
-  PersonDetails
+  PersonDetails,
+  PersonCredit
 } from '../models/tmdb.models';
+
+// talk show, jornalismo e reality: aparição, não trabalho
+const GENEROS_SEM_PAPEL = new Set([10767, 10763, 10764]);
 
 @Injectable({
   providedIn: 'root',
@@ -151,6 +155,57 @@ export class MovieService {
     const movieEntry = details.release_dates?.results?.find((r) => r.iso_3166_1 === country);
     const cert = movieEntry?.release_dates?.find((d) => d.certification)?.certification;
     return cert ?? '';
+  }
+
+  /**
+   * Filmografia relevante da pessoa, de cast e crew juntos.
+   *
+   * Só cast não serve: diretor e roteirista não aparecem lá, e o que sobra são
+   * entrevistas e documentários — o "Conhecido por" do Nolan vinha sem os filmes
+   * dele. Entram os papéis de atuação e as funções do próprio ofício da pessoa;
+   * aparições como ela mesma, talk show, jornalismo e reality ficam de fora.
+   * Um mesmo título creditado duas vezes (dirigiu e escreveu) aparece uma só.
+   */
+  getPersonCredits(person: PersonDetails | null): PersonCredit[] {
+    if (!person) return [];
+
+    const oficio = person.known_for_department;
+    const elenco = (person.combined_credits?.cast ?? []).filter(
+      (c) => !this.isAparicao(c)
+    );
+    const equipe = (person.combined_credits?.crew ?? []).filter(
+      (c) => c.department === oficio
+    );
+
+    const porTitulo = new Map<string, PersonCredit>();
+
+    for (const credito of [...elenco, ...equipe]) {
+      if ((credito.genre_ids ?? []).some((id) => GENEROS_SEM_PAPEL.has(id))) continue;
+      if (!credito.poster_path) continue;
+
+      const chave = `${credito.media_type}-${credito.id}`;
+      const atual = porTitulo.get(chave);
+      if (!atual || this.pesoCredito(credito, oficio) > this.pesoCredito(atual, oficio)) {
+        porTitulo.set(chave, credito);
+      }
+    }
+
+    // vote_count, e não popularity: popularity reflete acesso recente
+    return [...porTitulo.values()].sort((a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0));
+  }
+
+  // aparição como si mesmo não é trabalho
+  private isAparicao(credit: PersonCredit): boolean {
+    return /(self|himself|herself|themselves|ele mesmo|ela mesma)/i.test(
+      credit.character ?? ''
+    );
+  }
+
+  // qual crédito representa melhor o título quando a pessoa aparece duas vezes nele
+  private pesoCredito(credit: PersonCredit, oficio: string): number {
+    if (credit.department === oficio) return 3;
+    if (credit.character) return oficio === 'Acting' ? 2 : 1;
+    return 0;
   }
 
   /**

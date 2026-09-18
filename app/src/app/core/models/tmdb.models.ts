@@ -306,6 +306,8 @@ export interface PersonCredit {
   vote_count: number;
   genre_ids?: number[];
   character?: string;
+  job?: string;
+  department?: string;
   overview?: string;
 }
 

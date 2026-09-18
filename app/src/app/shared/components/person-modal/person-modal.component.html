@@ -90,12 +90,22 @@
           </div>
         </div>
 
+        <div class="mt-6">
+          <a
+            [routerLink]="['/search', 'people', person()!.id]"
+            (click)="close()"
+            class="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-300 inline-flex items-center gap-2 text-sm">
+            Ver mais sobre
+            <svg lucideArrowRight [size]="16" strokeWidth="2"></svg>
+          </a>
+        </div>
+
         @if (knownFor().length > 0) {
           <section class="mt-10">
             <h3 class="text-xl font-bold text-white mb-5">Conhecido por</h3>
 
             <app-carousel-row>
-              @for (credit of knownFor(); track credit.id) {
+              @for (credit of knownFor(); track credit.media_type + credit.id) {
                 <div class="flex-none w-40 snap-start" (click)="close()">
                   <app-movie-card
                     [id]="credit.id"
@@ -105,8 +115,8 @@
                     [rating]="credit.vote_average"
                     [mediaType]="getCreditMediaType(credit)">
                   </app-movie-card>
-                  @if (credit.character) {
-                    <p class="text-gray-500 text-xs mt-2 line-clamp-2">{{ credit.character }}</p>
+                  @if (getCreditRole(credit)) {
+                    <p class="text-gray-500 text-xs mt-2 line-clamp-2">{{ getCreditRole(credit) }}</p>
                   }
                 </div>
               }
