@@ -1,8 +1,10 @@
 import {
   Component,
+  ElementRef,
   HostListener,
   Input,
   OnDestroy,
+  ViewChild,
   computed,
   inject,
   signal,
@@ -77,6 +79,39 @@ export class MediaGalleryComponent implements OnDestroy {
   private smoothScroll = inject(SmoothScrollService);
 
   activeTab = signal<Aba>('videos');
+
+  /**
+   * O painel só bloqueia o Lenis quando de fato tem o que rolar.
+   *
+   * `data-lenis-prevent` fixo fazia a área engolir a rolagem mesmo com poucos
+   * itens, quando não há barra nenhuma — e a página travava ao passar o mouse
+   * por ali.
+   */
+  isScrollable = signal(false);
+
+  private scrollEl?: HTMLElement;
+  private resizeObserver?: ResizeObserver;
+
+  @ViewChild('mediaScroll')
+  set mediaScrollRef(el: ElementRef<HTMLElement> | undefined) {
+    this.resizeObserver?.disconnect();
+    this.scrollEl = el?.nativeElement;
+
+    if (!this.scrollEl) {
+      this.isScrollable.set(false);
+      return;
+    }
+
+    this.measureScrollable();
+    this.resizeObserver = new ResizeObserver(() => this.measureScrollable());
+    this.resizeObserver.observe(this.scrollEl);
+  }
+
+  private measureScrollable(): void {
+    const el = this.scrollEl;
+    if (!el) return;
+    this.isScrollable.set(el.scrollHeight - el.clientHeight > 1);
+  }
 
   // null mantém o lightbox fora do DOM
   openIndex = signal<number | null>(null);
@@ -169,11 +204,14 @@ export class MediaGalleryComponent implements OnDestroy {
   });
 
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
     if (this.openIndex() !== null) this.smoothScroll.start();
   }
 
   selectTab(tab: Aba): void {
     this.activeTab.set(tab);
+    // cada aba tem uma quantidade diferente de itens; remede depois de renderizar
+    setTimeout(() => this.measureScrollable());
   }
 
   imageUrl(image: ImageBackdrop, size: string): string {

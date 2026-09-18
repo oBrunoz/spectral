@@ -15,7 +15,10 @@
     </div>
 
     <!-- painel de altura fixa: a página não estica com dezenas de itens -->
-    <div class="media-scroll" data-lenis-prevent>
+    <div
+      #mediaScroll
+      class="media-scroll"
+      [attr.data-lenis-prevent]="isScrollable() ? '' : null">
 
       @if (resolvedTab() === 'videos') {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
