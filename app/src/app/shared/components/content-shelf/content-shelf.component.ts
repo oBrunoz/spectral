@@ -30,6 +30,9 @@ export class ContentShelfComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() title = '';
   @Input() params: Record<string, string | number> = {};
 
+  // a home usa títulos maiores que as páginas de catálogo
+  @Input() large = false;
+
   @Input()
   set genreId(value: number | null) {
     this.currentGenreId = value;

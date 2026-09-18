@@ -1,7 +1,7 @@
 <!-- a prateleira some por inteiro quando a consulta não devolve nada -->
 @if (isLoading() || items().length > 0) {
   <section class="px-20 mb-16">
-    <h2 class="text-2xl font-bold text-white mb-6">{{ title }}</h2>
+    <h2 class="font-bold text-white" [ngClass]="large ? 'text-3xl mb-8' : 'text-2xl mb-6'">{{ title }}</h2>
 
     @if (isLoading()) {
       <div class="flex gap-4 overflow-hidden">

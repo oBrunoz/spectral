@@ -7,9 +7,11 @@ export interface ShelfConfig {
 
 const currentYear = new Date().getFullYear();
 
-// Data de 30 dias atrás, no formato que a TMDB espera
-const daysAgo = (days: number): string =>
-  new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+// Data deslocada em dias, no formato que a TMDB espera
+const daysFromNow = (days: number): string =>
+  new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+const daysAgo = (days: number): string => daysFromNow(-days);
 
 export const MOVIE_SHELVES: ShelfConfig[] = [
   {
@@ -91,5 +93,54 @@ export const TV_SHELVES: ShelfConfig[] = [
     id: 'classicas',
     title: 'Clássicas para maratonar',
     params: { 'first_air_date.lte': '2009-12-31', sort_by: 'vote_count.desc' },
+  },
+];
+
+// Prateleiras da home, que precisam dizer de que tipo são
+export interface HomeShelfConfig extends ShelfConfig {
+  type: 'movie' | 'tv';
+}
+
+// estreia em sala: tipo 2 (limitada) e 3 (circuito), com data e região do Brasil
+const ESTREIA_EM_SALA = { with_release_type: '2|3', region: 'BR' };
+
+export const HOME_SHELVES: HomeShelfConfig[] = [
+  {
+    id: 'nos-cinemas',
+    type: 'movie',
+    title: 'Nos cinemas',
+    params: {
+      ...ESTREIA_EM_SALA,
+      'primary_release_date.gte': daysAgo(45),
+      'primary_release_date.lte': daysFromNow(0),
+      sort_by: 'popularity.desc',
+      // lançamento recente ainda tem pouca gente votando
+      'vote_count.gte': 0,
+    },
+  },
+  {
+    id: 'em-breve',
+    type: 'movie',
+    title: 'Em breve nos cinemas',
+    params: {
+      ...ESTREIA_EM_SALA,
+      'primary_release_date.gte': daysFromNow(1),
+      'primary_release_date.lte': daysFromNow(120),
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 0,
+    },
+  },
+  {
+    id: 'episodios-da-semana',
+    type: 'tv',
+    title: 'Com episódio novo esta semana',
+    params: {
+      'air_date.gte': daysAgo(7),
+      'air_date.lte': daysFromNow(0),
+      // sem talk show, jornalismo e reality: a fileira vinha cheia de programa diário
+      without_genres: '10767,10763,10764',
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 200,
+    },
   },
 ];

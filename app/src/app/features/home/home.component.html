@@ -101,6 +101,15 @@
       </div>
     </section>
 
+
+    <!-- Nos cinemas -->
+    <app-content-shelf
+      [type]="shelfNosCinemas.type"
+      [title]="shelfNosCinemas.title"
+      [params]="shelfNosCinemas.params"
+      [large]="true">
+    </app-content-shelf>
+
     <!-- Filmes populares -->
     <section class="px-20 mb-20">
       <div class="flex justify-between items-center mb-8">
@@ -144,6 +153,15 @@
         }
       </div>
     </section>
+
+
+    <!-- Em breve nos cinemas -->
+    <app-content-shelf
+      [type]="shelfEmBreve.type"
+      [title]="shelfEmBreve.title"
+      [params]="shelfEmBreve.params"
+      [large]="true">
+    </app-content-shelf>
 
     <!-- Explorar por gênero -->
     <section class="stripes-accent px-20 py-20 border-y border-white/5 bg-[#0d0d0d]">
@@ -208,6 +226,15 @@
         }
       </div>
     </section>
+
+
+    <!-- Séries com episódio novo -->
+    <app-content-shelf
+      [type]="shelfEpisodiosDaSemana.type"
+      [title]="shelfEpisodiosDaSemana.title"
+      [params]="shelfEpisodiosDaSemana.params"
+      [large]="true">
+    </app-content-shelf>
 
     <!-- Convite para cadastro -->
     <section class="relative min-h-[680px] flex items-center overflow-hidden bg-[#0d0d0d]">

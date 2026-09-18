@@ -7,6 +7,8 @@ import { MovieService } from '../../core/services/movie.service';
 import { MovieCardComponent } from '../../shared/components/movie-card/movie-card.component';
 import { HeroSectionComponent } from '../../shared/components/hero-section/hero-section.component';
 import { CarouselRowComponent } from '../../shared/components/carousel-row/carousel-row.component';
+import { ContentShelfComponent } from '../../shared/components/content-shelf/content-shelf.component';
+import { HOME_SHELVES, HomeShelfConfig } from '../../core/config/shelves';
 import { Movie, TvShow, SpotlightData } from '../../core/models/tmdb.models';
 import {
   LucideArrowRight,
@@ -26,6 +28,7 @@ import {
     MovieCardComponent,
     HeroSectionComponent,
     CarouselRowComponent,
+    ContentShelfComponent,
     LucideArrowRight,
     LucideChevronLeft,
     LucideChevronRight,
@@ -42,6 +45,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   popularMovies = signal<Movie[]>([]);
   trendingSeries = signal<TvShow[]>([]);
   lastRecommendation = signal<SpotlightData | undefined>(undefined);
+
+  // prateleiras que se carregam sozinhas quando o usuário chega nelas
+  shelfNosCinemas = this.shelf('nos-cinemas');
+  shelfEmBreve = this.shelf('em-breve');
+  shelfEpisodiosDaSemana = this.shelf('episodios-da-semana');
+
+  private shelf(id: string): HomeShelfConfig {
+    return HOME_SHELVES.find((s) => s.id === id)!;
+  }
 
   exploreGenres = [
     { id: 28, name: 'Ação' },
