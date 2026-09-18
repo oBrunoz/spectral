@@ -16,7 +16,8 @@ import {
   Genre,
   Review,
   SeasonDetails,
-  WatchProviderCountry
+  WatchProviderCountry,
+  PersonDetails
 } from '../models/tmdb.models';
 
 @Injectable({
@@ -150,6 +151,29 @@ export class MovieService {
     const movieEntry = details.release_dates?.results?.find((r) => r.iso_3166_1 === country);
     const cert = movieEntry?.release_dates?.find((d) => d.certification)?.certification;
     return cert ?? '';
+  }
+
+  /**
+   * Detalhes de uma pessoa.
+   *
+   * A TMDB frequentemente não tem biografia em pt-BR para nomes menos
+   * conhecidos (volta string vazia), então cai para o inglês em vez de mostrar
+   * um espaço em branco. O `language` no extraParams sobrescreve o padrão e
+   * entra na chave do cache, então o fallback também é cacheado.
+   */
+  getPersonDetails(id: number): Observable<PersonDetails> {
+    return this.get<PersonDetails>(`/person/${id}`, {
+      append_to_response: 'combined_credits,external_ids',
+    }).pipe(
+      switchMap((person) => {
+        if (person.biography?.trim()) return of(person);
+
+        return this.get<PersonDetails>(`/person/${id}`, { language: 'en-US' }).pipe(
+          map((fallback) => ({ ...person, biography: fallback.biography ?? '' })),
+          catchError(() => of(person))
+        );
+      })
+    );
   }
 
   getMovieVideos(id: number): Observable<VideoResponse> {

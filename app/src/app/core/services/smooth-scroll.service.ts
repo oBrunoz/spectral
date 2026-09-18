@@ -124,6 +124,17 @@ export class SmoothScrollService {
     window.scrollTo({ top: y, behavior: 'auto' });
   }
 
+  /** Trava a página por trás de um overlay (modal). */
+  stop(): void {
+    this.lenis?.stop();
+    document.body.style.overflow = 'hidden';
+  }
+
+  start(): void {
+    this.lenis?.start();
+    document.body.style.overflow = '';
+  }
+
   scrollTo(target: string | number | HTMLElement, offset = -80): void {
     if (this.lenis) {
       this.lenis.scrollTo(target, { offset });
