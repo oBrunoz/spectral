@@ -136,3 +136,6 @@ dist
 .pnp.*
 
 tailwind.css
+
+# instruções locais do Claude Code
+CLAUDE.md
