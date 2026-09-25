@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 import { visitanteGuard } from './core/guards/visitante.guard';
 
 export const routes: Routes = [
@@ -28,6 +29,12 @@ export const routes: Routes = [
     canActivate: [visitanteGuard],
     loadComponent: () =>
       import('./features/register/register.component').then((m) => m.RegisterComponent),
+  },
+  {
+    path: 'perfil',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/profile/profile.component').then((m) => m.ProfileComponent),
   },
   {
     path: 'search/people/:id',
