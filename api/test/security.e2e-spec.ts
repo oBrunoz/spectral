@@ -107,6 +107,55 @@ describe('Segurança (e2e)', () => {
     });
   });
 
+  describe('minha avaliação no título', () => {
+    // regressao: o front achava a propria review varrendo a lista publica
+    // paginada; num titulo com muitas reviews a dele sumia e salvar de novo
+    // apagava o texto ja escrito
+    it('acha a review do usuário mesmo atrás de outras mais novas', async () => {
+      const filme = 78;
+
+      await server()
+        .post('/reviews')
+        .set('Authorization', `Bearer ${ana.token}`)
+        .send({ tmdbId: filme, mediaType: 'movie', rating: 7, content: 'texto da ana' })
+        .expect(201);
+
+      await server()
+        .post('/reviews')
+        .set('Authorization', `Bearer ${bob.token}`)
+        .send({ tmdbId: filme, mediaType: 'movie', rating: 2, content: 'mais nova' })
+        .expect(201);
+
+      const paginaPublica = await server()
+        .get(`/reviews/media/movie/${filme}?limit=1`)
+        .expect(200);
+      expect(paginaPublica.body.some((r: { user: { id: string } }) => r.user.id === ana.id)).toBe(
+        false,
+      );
+
+      const minha = await server()
+        .get(`/reviews/me/movie/${filme}`)
+        .set('Authorization', `Bearer ${ana.token}`)
+        .expect(200);
+
+      expect(minha.body.rating).toBe(7);
+      expect(minha.body.content).toBe('texto da ana');
+    });
+
+    it('devolve vazio quando o usuário não avaliou', async () => {
+      const resposta = await server()
+        .get('/reviews/me/movie/12345')
+        .set('Authorization', `Bearer ${ana.token}`)
+        .expect(200);
+
+      expect(resposta.body).toEqual({});
+    });
+
+    it('exige autenticação', async () => {
+      await server().get('/reviews/me/movie/550').expect(401);
+    });
+  });
+
   describe('limites de entrada', () => {
     // regressao: tmdbId acima de int4 estourava no Postgres e virava 500
     it('tmdbId acima do int4 vira 400, não 500', async () => {
