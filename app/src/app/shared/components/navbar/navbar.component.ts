@@ -17,6 +17,7 @@ import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs
 import { takeUntil } from 'rxjs/operators';
 import { MovieService } from '../../../core/services/movie.service';
 import { LoadingService } from '../../../core/services/loading.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { MediaResult } from '../../../core/models/tmdb.models';
 import { LucideSearch, LucideStar, LucideX } from '@lucide/angular';
 import { MediaFallbackComponent } from '../media-fallback/media-fallback.component';
@@ -46,7 +47,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private movieService: MovieService,
     private router: Router,
-    public loading: LoadingService
+    public loading: LoadingService,
+    public auth: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -84,6 +86,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  sair(): void {
+    this.closeSidebar();
+    this.auth
+      .sair()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => void this.router.navigateByUrl('/'));
   }
 
   onSearchInput(value: string): void {
