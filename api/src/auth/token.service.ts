@@ -45,7 +45,6 @@ export class TokenService {
     return { accessToken, refreshToken, refreshExpiresAt };
   }
 
-  // troca o refresh usado por um novo. o antigo morre aqui.
   async rotate(refreshToken: string): Promise<TokenPair> {
     const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash: TokenService.hash(refreshToken) },
@@ -55,7 +54,6 @@ export class TokenService {
       throw new UnauthorizedException('Refresh token invalido');
     }
 
-    // token ja usado sendo apresentado de novo: alguem copiou. derruba a sessao inteira.
     if (stored.revokedAt) {
       await this.revokeAllFor(stored.userId);
       throw new UnauthorizedException('Refresh token reutilizado');
@@ -87,8 +85,6 @@ export class TokenService {
     });
   }
 
-  // sha256 basta: o token tem 384 bits de entropia, nao da pra adivinhar.
-  // senha precisa de argon2 porque e curta e humana.
   private static hash(token: string): string {
     return createHash('sha256').update(token).digest('hex');
   }

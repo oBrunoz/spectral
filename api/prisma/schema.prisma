@@ -32,8 +32,6 @@ model User {
   @@map("users")
 }
 
-// espelho local do que a TMDB devolve, pra montar a estante do usuario
-// sem disparar uma chamada por item
 model Media {
   id          String    @id @default(uuid(7))
   tmdbId      Int
@@ -95,7 +93,6 @@ model Follow {
   @@map("follows")
 }
 
-// guarda so o hash do refresh token: vazou o banco, os tokens nao servem
 model RefreshToken {
   id        String    @id @default(uuid(7))
   userId    String

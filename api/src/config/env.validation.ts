@@ -1,5 +1,12 @@
 import { plainToInstance } from 'class-transformer';
-import { IsEnum, IsInt, IsNotEmpty, IsString, MinLength, validateSync } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  validateSync,
+} from 'class-validator';
 
 enum NodeEnv {
   Development = 'development',
@@ -22,7 +29,6 @@ class EnvironmentVariables {
   @IsNotEmpty()
   DATABASE_URL: string;
 
-  // curto demais e o token vira brincadeira de forca
   @IsString()
   @MinLength(32)
   JWT_SECRET: string;
@@ -33,12 +39,17 @@ class EnvironmentVariables {
 }
 
 export function validate(raw: Record<string, unknown>): EnvironmentVariables {
-  const config = plainToInstance(EnvironmentVariables, raw, { enableImplicitConversion: true });
+  const config = plainToInstance(EnvironmentVariables, raw, {
+    enableImplicitConversion: true,
+  });
   const errors = validateSync(config, { skipMissingProperties: false });
 
   if (errors.length > 0) {
     const detalhes = errors
-      .map((e) => `  - ${e.property}: ${Object.values(e.constraints ?? {}).join('; ')}`)
+      .map(
+        (e) =>
+          `  - ${e.property}: ${Object.values(e.constraints ?? {}).join('; ')}`,
+      )
       .join('\n');
     throw new Error(`Variaveis de ambiente invalidas:\n${detalhes}`);
   }
