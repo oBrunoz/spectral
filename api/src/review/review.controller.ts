@@ -25,6 +25,12 @@ import { ReviewService } from './review.service.js';
 export class ReviewController {
   constructor(private readonly reviews: ReviewService) {}
 
+  @Get('me/:mediaType/:tmdbId')
+  @UseGuards(JwtAuthGuard)
+  minha(@CurrentUser() user: AccessTokenPayload, @Param() ref: MediaRefDto) {
+    return this.reviews.minhaNoTitulo(user.sub, ref.tmdbId, ref.mediaType);
+  }
+
   @Get('media/:mediaType/:tmdbId')
   listByMedia(@Param() ref: MediaRefDto, @Query() pagina: PaginationDto) {
     return this.reviews.listByMedia(ref.tmdbId, ref.mediaType, pagina);

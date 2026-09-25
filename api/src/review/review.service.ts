@@ -61,6 +61,13 @@ export class ReviewService {
     await this.prisma.review.delete({ where: { id: reviewId } });
   }
 
+  minhaNoTitulo(userId: string, tmdbId: number, type: MediaType) {
+    return this.prisma.review.findFirst({
+      where: { userId, media: { tmdbId, type } },
+      include: { media: true, user: AUTOR },
+    });
+  }
+
   listByMedia(tmdbId: number, type: MediaType, pagina: PaginationDto) {
     return this.prisma.review.findMany({
       where: { media: { tmdbId, type } },
