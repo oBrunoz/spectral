@@ -41,9 +41,9 @@ export class TmdbService {
       const response = await firstValueFrom(
         this.http.get<T>(`${BASE_URL}${path}`, {
           params: {
+            language: LANG,
             ...params,
             api_key: this.config.getOrThrow<string>('TMDB_API_KEY'),
-            language: LANG,
           },
         }),
       );

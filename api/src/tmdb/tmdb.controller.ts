@@ -48,7 +48,7 @@ export class TmdbController {
       throw new BadRequestException('Endpoint não permitido');
     }
 
-    const { api_key: _chave, language: _idioma, ...resto } = query;
+    const { api_key: _chave, ...resto } = query;
 
     return this.tmdb.get(`/${segmentos.join('/')}`, resto);
   }

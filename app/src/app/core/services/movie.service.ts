@@ -28,8 +28,7 @@ const GENEROS_SEM_PAPEL = new Set([10767, 10763, 10764]);
   providedIn: 'root',
 })
 export class MovieService {
-  private readonly baseUrl = environment.tmdbBaseUrl;
-  private readonly apiKey = environment.tmdbApiKey;
+  private readonly baseUrl = `${environment.apiUrl}/tmdb`;
   private readonly lang = 'pt-BR';
 
   constructor(private http: HttpClient) {}
@@ -40,9 +39,7 @@ export class MovieService {
   private readonly cacheMaxEntries = 150;
 
   private get<T>(endpoint: string, extraParams: Record<string, any> = {}): Observable<T> {
-    let params = new HttpParams()
-      .set('api_key', this.apiKey)
-      .set('language', this.lang);
+    let params = new HttpParams().set('language', this.lang);
 
     Object.entries(extraParams).forEach(([key, value]) => {
       params = params.set(key, String(value));
@@ -126,10 +123,7 @@ export class MovieService {
    * As reviews da TMDB são quase todas em inglês; pedir em pt-BR devolve lista vazia.
    */
   getReviews(id: number, type: 'movie' | 'tv', page = 1): Observable<TmdbListResponse<Review>> {
-    const params = new HttpParams()
-      .set('api_key', this.apiKey)
-      .set('language', 'en-US')
-      .set('page', String(page));
+    const params = new HttpParams().set('language', 'en-US').set('page', String(page));
 
     return this.http
       .get<TmdbListResponse<Review>>(`${this.baseUrl}/${type}/${id}/reviews`, { params })
@@ -274,9 +268,7 @@ export class MovieService {
         if (trailer) return of(`https://www.youtube.com/embed/${trailer.key}`);
 
         // Fallback: busca em inglês se não encontrar em pt-BR
-        let params = new HttpParams()
-          .set('api_key', this.apiKey)
-          .set('language', 'en-US');
+        let params = new HttpParams().set('language', 'en-US');
         const endpoint = type === 'movie' ? `/movie/${id}/videos` : `/tv/${id}/videos`;
         return this.http.get<VideoResponse>(`${this.baseUrl}${endpoint}`, { params }).pipe(
           map((d) => {
