@@ -86,10 +86,15 @@
           </div>
         </div>
 
+        @if (erro()) {
+          <p class="text-sm text-red-400">{{ erro() }}</p>
+        }
+
         <button
           type="submit"
-          class="w-full cursor-pointer bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-300 text-base font-semibold">
-          Criar conta
+          [disabled]="enviando()"
+          class="w-full cursor-pointer bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-300 text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed">
+          {{ enviando() ? 'Criando...' : 'Criar conta' }}
         </button>
       </form>
 

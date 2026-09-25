@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideMail, LucideLock, LucideEye, LucideEyeOff } from '@lucide/angular';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { LucideEye, LucideEyeOff, LucideLock, LucideMail } from '@lucide/angular';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,16 +12,41 @@ import { LucideMail, LucideLock, LucideEye, LucideEyeOff } from '@lucide/angular
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly rota = inject(ActivatedRoute);
+
   email = signal('');
   password = signal('');
   showPassword = signal(false);
+  enviando = signal(false);
+  erro = signal('');
 
   togglePassword(): void {
     this.showPassword.update((v) => !v);
   }
 
   onSubmit(): void {
-    // Auth não implementado no backend ainda
-    console.log('Login:', this.email(), this.password());
+    if (this.enviando()) return;
+
+    this.enviando.set(true);
+    this.erro.set('');
+
+    this.auth.entrar({ email: this.email(), password: this.password() }).subscribe({
+      next: () => {
+        const destino = this.rota.snapshot.queryParamMap.get('redirect') ?? '/';
+        void this.router.navigateByUrl(destino);
+      },
+      error: (falha) => {
+        this.enviando.set(false);
+        this.erro.set(
+          falha.status === 401
+            ? 'E-mail ou senha inválidos.'
+            : falha.status === 429
+              ? 'Muitas tentativas. Espere um minuto.'
+              : 'Não foi possível entrar. Tente de novo.',
+        );
+      },
+    });
   }
 }
