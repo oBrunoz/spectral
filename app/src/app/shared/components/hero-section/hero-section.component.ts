@@ -15,7 +15,6 @@ import {
   LucideRotateCcw,
   LucideStar,
   LucidePlay,
-  LucidePlus,
   LucidePause,
   LucideInfo,
 } from '@lucide/angular';
@@ -23,7 +22,7 @@ import {
 @Component({
   selector: 'app-hero-section',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideTriangleAlert, LucideRotateCcw, LucideStar, LucidePlay, LucidePlus, LucidePause, LucideInfo],
+  imports: [CommonModule, RouterModule, LucideTriangleAlert, LucideRotateCcw, LucideStar, LucidePlay, LucidePause, LucideInfo],
   templateUrl: './hero-section.component.html',
   styleUrl: './hero-section.component.css'
 })
@@ -45,7 +44,6 @@ export class HeroSectionComponent {
   @Input() detailsRoute: unknown[] | null = null;
 
   @Output() retryClicked = new EventEmitter<void>();
-  @Output() addToListClicked = new EventEmitter<void>();
 
   @Output() trailerOpened = new EventEmitter<void>();
   @Output() trailerClosed = new EventEmitter<void>();

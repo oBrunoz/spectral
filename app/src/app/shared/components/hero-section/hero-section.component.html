@@ -150,11 +150,6 @@
               class="px-6 py-3 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
               <svg lucidePlay class="mr-1" [size]="16" strokeWidth="3" fill="currentColor"></svg> Assistir trailer
             </button>
-            <button
-              (click)="addToListClicked.emit()"
-              class="px-6 py-3 bg-white/10 text-white rounded-full hover:bg-white/20 transition duration-300 flex items-center">
-              <svg lucidePlus class="mr-1" [size]="16" strokeWidth="2"></svg> Adicionar à lista
-            </button>
             @if (detailsRoute) {
               <a
                 [routerLink]="detailsRoute"
