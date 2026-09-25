@@ -1,0 +1,111 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MediaType {
+  MOVIE
+  TV
+}
+
+model User {
+  id           String   @id @default(uuid(7))
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  bio          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  watchlist     WatchlistItem[]
+  reviews       Review[]
+  following     Follow[]        @relation("UserFollowing")
+  followers     Follow[]        @relation("UserFollowers")
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+// espelho local do que a TMDB devolve, pra montar a estante do usuario
+// sem disparar uma chamada por item
+model Media {
+  id          String    @id @default(uuid(7))
+  tmdbId      Int
+  type        MediaType
+  title       String
+  posterPath  String?
+  releaseDate DateTime?
+  syncedAt    DateTime  @updatedAt
+
+  watchlistItems WatchlistItem[]
+  reviews        Review[]
+
+  @@unique([tmdbId, type])
+  @@map("medias")
+}
+
+model WatchlistItem {
+  id      String   @id @default(uuid(7))
+  userId  String
+  mediaId String
+  addedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, mediaId])
+  @@index([userId, addedAt])
+  @@map("watchlist_items")
+}
+
+model Review {
+  id        String    @id @default(uuid(7))
+  userId    String
+  mediaId   String
+  rating    Int?
+  content   String?
+  watchedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, mediaId])
+  @@index([mediaId, createdAt])
+  @@map("reviews")
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+  @@map("follows")
+}
+
+// guarda so o hash do refresh token: vazou o banco, os tokens nao servem
+model RefreshToken {
+  id        String    @id @default(uuid(7))
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
