@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -20,20 +19,34 @@ export class ReviewService {
     private readonly media: MediaService,
   ) {}
 
+  // o corpo carrega a ficha inteira do usuario no titulo, nao um campo isolado:
+  // desmarcar tudo apaga a ficha em vez de deixar uma linha vazia no banco
   async upsert(userId: string, dto: UpsertReviewDto) {
-    if (dto.rating === undefined && !dto.content?.trim()) {
-      throw new BadRequestException('Informe ao menos uma nota ou um texto');
+    const media = await this.media.resolve(dto.tmdbId, dto.mediaType);
+    const where = { userId_mediaId: { userId, mediaId: media.id } };
+    const anterior = await this.prisma.review.findUnique({ where });
+
+    const texto = dto.content?.trim() || null;
+    const vazia =
+      dto.rating === undefined && !texto && !dto.liked && !dto.watched;
+
+    if (vazia) {
+      if (anterior) {
+        await this.prisma.review.delete({ where });
+      }
+      return null;
     }
 
-    const media = await this.media.resolve(dto.tmdbId, dto.mediaType);
     const dados = {
       rating: dto.rating ?? null,
-      content: dto.content ?? null,
-      watchedAt: dto.watchedAt ? new Date(dto.watchedAt) : null,
+      content: texto,
+      liked: dto.liked ?? false,
+      // remarcar nao reescreve a data original de quando assistiu
+      watchedAt: dto.watched ? (anterior?.watchedAt ?? new Date()) : null,
     };
 
     return this.prisma.review.upsert({
-      where: { userId_mediaId: { userId, mediaId: media.id } },
+      where,
       create: { userId, mediaId: media.id, ...dados },
       update: dados,
       include: { media: true, user: AUTOR },
@@ -48,6 +61,7 @@ export class ReviewService {
       data: {
         ...(dto.rating !== undefined && { rating: dto.rating }),
         ...(dto.content !== undefined && { content: dto.content }),
+        ...(dto.liked !== undefined && { liked: dto.liked }),
         ...(dto.watchedAt !== undefined && {
           watchedAt: new Date(dto.watchedAt),
         }),

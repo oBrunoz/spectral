@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsDateString,
   IsInt,
   IsOptional,
@@ -21,6 +22,10 @@ export class UpdateReviewDto {
   @IsString()
   @MaxLength(5000)
   content?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  liked?: boolean;
 
   @IsOptional()
   @IsDateString()

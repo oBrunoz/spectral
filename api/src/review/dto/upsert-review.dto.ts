@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import {
-  IsDateString,
+  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -24,6 +24,11 @@ export class UpsertReviewDto extends MediaRefDto {
   content?: string;
 
   @IsOptional()
-  @IsDateString()
-  watchedAt?: string;
+  @IsBoolean()
+  liked?: boolean;
+
+  // marcar/desmarcar como assistido; a data em si fica a cargo do servidor
+  @IsOptional()
+  @IsBoolean()
+  watched?: boolean;
 }
