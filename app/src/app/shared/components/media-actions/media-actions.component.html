@@ -1,6 +1,11 @@
 @if (!auth.autenticado()) {
   <p class="text-gray-400">
-    <a routerLink="/login" class="text-white hover:text-red-500 transition duration-300">Entre na sua conta</a>
+    <a
+      routerLink="/login"
+      [queryParams]="destinoAposLogin"
+      class="text-white hover:text-red-500 transition duration-300">
+      Entre na sua conta
+    </a>
     para dar nota, escrever e montar sua watchlist.
   </p>
 } @else {
@@ -8,7 +13,7 @@
     <button
       type="button"
       (click)="alternarWatchlist()"
-      [disabled]="ocupado()"
+      [disabled]="salvandoWatchlist() || carregando()"
       class="px-6 py-3 rounded-full transition duration-300 flex items-center gap-2 text-sm font-medium cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       [class]="naWatchlist() ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-red-600 hover:bg-red-700 text-white'">
       @if (naWatchlist()) {
@@ -28,8 +33,10 @@
             type="button"
             (click)="definirNota(valor)"
             (mouseenter)="notaVisualizada.set(valor)"
+            [disabled]="carregando()"
             [attr.aria-label]="'Dar nota ' + valor"
-            class="cursor-pointer transition duration-300"
+            [attr.aria-pressed]="nota() === valor"
+            class="cursor-pointer transition duration-300 disabled:cursor-not-allowed"
             [class]="estrelaAtiva(valor) ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'">
             <svg lucideStar [size]="18" strokeWidth="2" [attr.fill]="estrelaAtiva(valor) ? 'currentColor' : 'none'"></svg>
           </button>
@@ -42,29 +49,32 @@
   </div>
 
   <div class="mt-6 max-w-3xl">
+    <label for="texto-avaliacao" class="sr-only">Sua avaliação em texto</label>
     <textarea
+      id="texto-avaliacao"
       [ngModel]="texto()"
       (ngModelChange)="texto.set($event)"
+      [disabled]="carregando()"
       rows="4"
       maxlength="5000"
-      placeholder="O que você achou? (opcional)"
-      class="w-full bg-[#1a1a1a] text-white placeholder-gray-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 resize-y"></textarea>
+      [placeholder]="carregando() ? 'Carregando sua avaliação...' : 'O que você achou? (opcional)'"
+      class="w-full bg-[#1a1a1a] text-white placeholder-gray-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 resize-y disabled:opacity-60"></textarea>
 
     <div class="mt-4 flex flex-wrap items-center gap-4">
       <button
         type="button"
         (click)="salvarAvaliacao()"
-        [disabled]="ocupado()"
+        [disabled]="salvandoAvaliacao() || carregando()"
         class="px-6 py-3 rounded-full transition duration-300 flex items-center text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
-        {{ ocupado() ? 'Salvando...' : avaliacaoId() ? 'Atualizar avaliação' : 'Salvar avaliação' }}
+        {{ salvandoAvaliacao() ? 'Salvando...' : avaliacaoId() ? 'Atualizar avaliação' : 'Salvar avaliação' }}
       </button>
 
       @if (avaliacaoId()) {
         <button
           type="button"
           (click)="apagarAvaliacao()"
-          [disabled]="ocupado()"
-          class="text-sm text-gray-400 hover:text-white transition duration-300 flex items-center gap-2 cursor-pointer">
+          [disabled]="salvandoAvaliacao()"
+          class="text-sm text-gray-400 hover:text-white transition duration-300 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed">
           <svg lucideTrash2 [size]="14" strokeWidth="2"></svg>
           Remover
         </button>
@@ -77,5 +87,11 @@
         <span class="text-sm text-red-400">{{ erro() }}</span>
       }
     </div>
+
+    @if (erroCarga()) {
+      <p class="mt-4 text-sm text-red-400">
+        {{ erroCarga() }} Salvar agora pode sobrescrever o que você já tinha escrito.
+      </p>
+    }
   </div>
 }

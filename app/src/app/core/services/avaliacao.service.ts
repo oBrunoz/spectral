@@ -9,6 +9,10 @@ export class AvaliacaoService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/reviews`;
 
+  minhaNoTitulo(tmdbId: number, tipo: TipoMidia): Observable<AvaliacaoUsuario | null> {
+    return this.http.get<AvaliacaoUsuario | null>(`${this.base}/me/${tipo}/${tmdbId}`);
+  }
+
   porTitulo(tmdbId: number, tipo: TipoMidia, limite = 20): Observable<AvaliacaoUsuario[]> {
     return this.http.get<AvaliacaoUsuario[]>(`${this.base}/media/${tipo}/${tmdbId}?limit=${limite}`);
   }

@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { LucideBookmark, LucideCheck, LucideStar, LucideTrash2 } from '@lucide/angular';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { mensagemDeErro } from '../../../core/errors/mensagens';
@@ -40,6 +40,7 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) mediaType!: TipoMidia;
 
   readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   private readonly watchlist = inject(WatchlistService);
   private readonly avaliacoes = inject(AvaliacaoService);
 
@@ -51,18 +52,31 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
   texto = signal('');
   avaliacaoId = signal<string | null>(null);
 
-  ocupado = signal(false);
+  // referência estável: um getter devolveria objeto novo a cada ciclo de
+  // detecção e o Angular acusaria mudança depois de verificado
+  destinoAposLogin: Record<string, string> = {};
+
+  carregando = signal(false);
+  salvandoWatchlist = signal(false);
+  salvandoAvaliacao = signal(false);
+  erroCarga = signal('');
   erro = signal('');
   confirmacao = signal('');
 
+  // emite a cada troca de título para descartar respostas da carga anterior
+  private cancelarCarga$ = new Subject<void>();
   private destroy$ = new Subject<void>();
 
   ngOnChanges(): void {
+    this.destinoAposLogin = { redirect: this.router.url };
+    this.cancelarCarga$.next();
     this.limparEstado();
     if (this.auth.autenticado() && this.tmdbId) this.carregar();
   }
 
   ngOnDestroy(): void {
+    this.cancelarCarga$.next();
+    this.cancelarCarga$.complete();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -76,8 +90,8 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
   }
 
   alternarWatchlist(): void {
-    if (this.ocupado()) return;
-    this.ocupado.set(true);
+    if (this.salvandoWatchlist()) return;
+    this.salvandoWatchlist.set(true);
     this.erro.set('');
 
     const acao: Observable<unknown> = this.naWatchlist()
@@ -87,17 +101,17 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
     acao.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.naWatchlist.update((v) => !v);
-        this.ocupado.set(false);
+        this.salvandoWatchlist.set(false);
       },
       error: (falha) => {
         this.erro.set(mensagemDeErro(falha));
-        this.ocupado.set(false);
+        this.salvandoWatchlist.set(false);
       },
     });
   }
 
   salvarAvaliacao(): void {
-    if (this.ocupado()) return;
+    if (this.salvandoAvaliacao() || this.carregando()) return;
 
     const conteudo = this.texto().trim();
     if (this.nota() === null && conteudo === '') {
@@ -105,7 +119,7 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    this.ocupado.set(true);
+    this.salvandoAvaliacao.set(true);
     this.erro.set('');
     this.confirmacao.set('');
 
@@ -121,20 +135,20 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
         next: (salva) => {
           this.avaliacaoId.set(salva.id);
           this.confirmacao.set('Avaliação salva.');
-          this.ocupado.set(false);
+          this.salvandoAvaliacao.set(false);
         },
         error: (falha) => {
           this.erro.set(mensagemDeErro(falha));
-          this.ocupado.set(false);
+          this.salvandoAvaliacao.set(false);
         },
       });
   }
 
   apagarAvaliacao(): void {
     const id = this.avaliacaoId();
-    if (!id || this.ocupado()) return;
+    if (!id || this.salvandoAvaliacao()) return;
 
-    this.ocupado.set(true);
+    this.salvandoAvaliacao.set(true);
     this.avaliacoes
       .remover(id)
       .pipe(takeUntil(this.destroy$))
@@ -144,38 +158,41 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
           this.nota.set(null);
           this.texto.set('');
           this.confirmacao.set('Avaliação removida.');
-          this.ocupado.set(false);
+          this.salvandoAvaliacao.set(false);
         },
         error: (falha) => {
           this.erro.set(mensagemDeErro(falha));
-          this.ocupado.set(false);
+          this.salvandoAvaliacao.set(false);
         },
       });
   }
 
   private carregar(): void {
+    this.carregando.set(true);
+    this.erroCarga.set('');
+
     this.watchlist
       .contem(this.tmdbId, this.mediaType)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.cancelarCarga$), takeUntil(this.destroy$))
       .subscribe({
         next: ({ present }) => this.naWatchlist.set(present),
-        error: () => this.naWatchlist.set(false),
+        error: (falha) => this.erroCarga.set(mensagemDeErro(falha)),
       });
 
-    const meuId = this.auth.usuario()?.id;
-    if (!meuId) return;
-
     this.avaliacoes
-      .porTitulo(this.tmdbId, this.mediaType)
-      .pipe(takeUntil(this.destroy$))
+      .minhaNoTitulo(this.tmdbId, this.mediaType)
+      .pipe(takeUntil(this.cancelarCarga$), takeUntil(this.destroy$))
       .subscribe({
-        next: (lista) => {
-          const minha = lista.find((item) => item.user?.id === meuId);
+        next: (minha) => {
           this.avaliacaoId.set(minha?.id ?? null);
           this.nota.set(minha?.rating ?? null);
           this.texto.set(minha?.content ?? '');
+          this.carregando.set(false);
         },
-        error: () => undefined,
+        error: (falha) => {
+          this.erroCarga.set(mensagemDeErro(falha));
+          this.carregando.set(false);
+        },
       });
   }
 
@@ -184,6 +201,10 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
     this.nota.set(null);
     this.texto.set('');
     this.avaliacaoId.set(null);
+    this.carregando.set(false);
+    this.salvandoWatchlist.set(false);
+    this.salvandoAvaliacao.set(false);
+    this.erroCarga.set('');
     this.erro.set('');
     this.confirmacao.set('');
   }
