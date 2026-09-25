@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideEye, LucideEyeOff, LucideLock, LucideMail } from '@lucide/angular';
+import { mensagemDeErro } from '../../core/errors/mensagens';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -40,11 +41,9 @@ export class LoginComponent {
       error: (falha) => {
         this.enviando.set(false);
         this.erro.set(
-          falha.status === 401
-            ? 'E-mail ou senha inválidos.'
-            : falha.status === 429
-              ? 'Muitas tentativas. Espere um minuto.'
-              : 'Não foi possível entrar. Tente de novo.',
+          mensagemDeErro(falha, {
+            401: 'E-mail ou senha incorretos. Confira e tente de novo.',
+          }),
         );
       },
     });

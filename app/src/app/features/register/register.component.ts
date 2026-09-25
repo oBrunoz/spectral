@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { LucideEye, LucideEyeOff, LucideLock, LucideMail, LucideUser } from '@lucide/angular';
+import { erroMenciona, mensagemDeErro } from '../../core/errors/mensagens';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -47,23 +48,23 @@ export class RegisterComponent {
         next: () => void this.router.navigateByUrl('/'),
         error: (falha) => {
           this.enviando.set(false);
-          this.erro.set(this.mensagem(falha));
+          this.erro.set(
+            mensagemDeErro(falha, {
+              409: 'Esse e-mail já tem uma conta. Entre nela ou use outro endereço.',
+              400: this.dadoInvalido(falha),
+            }),
+          );
         },
       });
   }
 
-  private mensagem(falha: { status: number; error?: { message?: string | string[] } }): string {
-    if (falha.status === 409) return 'Esse e-mail já está cadastrado.';
-    if (falha.status === 429) return 'Muitas tentativas. Espere um minuto.';
+  private dadoInvalido(falha: unknown): string {
+    const problemas = [
+      erroMenciona(falha, 'name') ? 'Informe seu nome, com pelo menos 2 letras.' : '',
+      erroMenciona(falha, 'email') ? 'Informe um e-mail válido.' : '',
+      erroMenciona(falha, 'password') ? 'A senha precisa ter pelo menos 8 caracteres.' : '',
+    ].filter(Boolean);
 
-    if (falha.status === 400) {
-      const detalhe = falha.error?.message;
-      if (Array.isArray(detalhe) && detalhe.some((m) => m.includes('password'))) {
-        return 'A senha precisa de pelo menos 8 caracteres.';
-      }
-      return 'Confira os dados informados.';
-    }
-
-    return 'Não foi possível criar a conta. Tente de novo.';
+    return problemas.length > 0 ? problemas.join(' ') : 'Revise os dados informados e tente de novo.';
   }
 }
