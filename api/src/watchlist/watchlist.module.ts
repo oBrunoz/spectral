@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module.js';
+import { MediaModule } from '../media/media.module.js';
+import { WatchlistController } from './watchlist.controller.js';
+import { WatchlistService } from './watchlist.service.js';
+
+@Module({
+  imports: [MediaModule, AuthModule],
+  controllers: [WatchlistController],
+  providers: [WatchlistService],
+})
+export class WatchlistModule {}
