@@ -16,6 +16,16 @@
 
   @if (contentType() === 'movies' || contentType() === 'series') {
 
+    <!-- Watchlist e avaliação do usuário -->
+    @if (details(); as conteudo) {
+      <section class="bg-[#0d0d0d] py-16">
+        <div class="px-20">
+          <h2 class="text-3xl font-bold mb-8 text-white">Sua avaliação</h2>
+          <app-media-actions [tmdbId]="conteudo.id" [mediaType]="apiType()"></app-media-actions>
+        </div>
+      </section>
+    }
+
     <!-- Onde assistir -->
     @if (hasWatchProviders()) {
       <section class="bg-[#0d0d0d] py-16">

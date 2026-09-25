@@ -1,0 +1,81 @@
+@if (!auth.autenticado()) {
+  <p class="text-gray-400">
+    <a routerLink="/login" class="text-white hover:text-red-500 transition duration-300">Entre na sua conta</a>
+    para dar nota, escrever e montar sua watchlist.
+  </p>
+} @else {
+  <div class="flex flex-wrap items-center gap-4">
+    <button
+      type="button"
+      (click)="alternarWatchlist()"
+      [disabled]="ocupado()"
+      class="px-6 py-3 rounded-full transition duration-300 flex items-center gap-2 text-sm font-medium cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+      [class]="naWatchlist() ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-red-600 hover:bg-red-700 text-white'">
+      @if (naWatchlist()) {
+        <svg lucideCheck [size]="16" strokeWidth="2"></svg>
+        Na sua watchlist
+      } @else {
+        <svg lucideBookmark [size]="16" strokeWidth="2"></svg>
+        Adicionar à watchlist
+      }
+    </button>
+
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-gray-400">Sua nota</span>
+      <div class="flex items-center gap-1" (mouseleave)="notaVisualizada.set(null)">
+        @for (valor of notas; track valor) {
+          <button
+            type="button"
+            (click)="definirNota(valor)"
+            (mouseenter)="notaVisualizada.set(valor)"
+            [attr.aria-label]="'Dar nota ' + valor"
+            class="cursor-pointer transition duration-300"
+            [class]="estrelaAtiva(valor) ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'">
+            <svg lucideStar [size]="18" strokeWidth="2" [attr.fill]="estrelaAtiva(valor) ? 'currentColor' : 'none'"></svg>
+          </button>
+        }
+      </div>
+      @if (nota()) {
+        <span class="text-sm text-yellow-400">{{ nota() }}/10</span>
+      }
+    </div>
+  </div>
+
+  <div class="mt-6 max-w-3xl">
+    <textarea
+      [ngModel]="texto()"
+      (ngModelChange)="texto.set($event)"
+      rows="4"
+      maxlength="5000"
+      placeholder="O que você achou? (opcional)"
+      class="w-full bg-[#1a1a1a] text-white placeholder-gray-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 resize-y"></textarea>
+
+    <div class="mt-4 flex flex-wrap items-center gap-4">
+      <button
+        type="button"
+        (click)="salvarAvaliacao()"
+        [disabled]="ocupado()"
+        class="px-6 py-3 rounded-full transition duration-300 flex items-center text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+        {{ ocupado() ? 'Salvando...' : avaliacaoId() ? 'Atualizar avaliação' : 'Salvar avaliação' }}
+      </button>
+
+      @if (avaliacaoId()) {
+        <button
+          type="button"
+          (click)="apagarAvaliacao()"
+          [disabled]="ocupado()"
+          class="text-sm text-gray-400 hover:text-white transition duration-300 flex items-center gap-2 cursor-pointer">
+          <svg lucideTrash2 [size]="14" strokeWidth="2"></svg>
+          Remover
+        </button>
+      }
+
+      @if (confirmacao()) {
+        <span class="text-sm text-gray-400">{{ confirmacao() }}</span>
+      }
+      @if (erro()) {
+        <span class="text-sm text-red-400">{{ erro() }}</span>
+      }
+    </div>
+  </div>
+}

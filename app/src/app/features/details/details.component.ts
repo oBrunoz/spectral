@@ -20,6 +20,7 @@ import { ContentFactsComponent } from '../../shared/components/content-facts/con
 import { SeasonListComponent } from '../../shared/components/season-list/season-list.component';
 import { MediaGalleryComponent } from '../../shared/components/media-gallery/media-gallery.component';
 import { ReviewCardComponent } from '../../shared/components/review-card/review-card.component';
+import { MediaActionsComponent } from '../../shared/components/media-actions/media-actions.component';
 import {
   ContentDetails,
   ImageBackdrop,
@@ -66,6 +67,7 @@ const REVIEWS_VAZIAS: TmdbListResponse<Review> = {
     SeasonListComponent,
     MediaGalleryComponent,
     ReviewCardComponent,
+    MediaActionsComponent,
   ],
   templateUrl: './details.component.html',
   styleUrls: ['./details.component.css'],
