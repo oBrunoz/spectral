@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { visitanteGuard } from './core/guards/visitante.guard';
 
 export const routes: Routes = [
   {
@@ -18,11 +19,13 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [visitanteGuard],
     loadComponent: () =>
       import('./features/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'register',
+    canActivate: [visitanteGuard],
     loadComponent: () =>
       import('./features/register/register.component').then((m) => m.RegisterComponent),
   },
