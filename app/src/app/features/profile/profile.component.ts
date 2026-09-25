@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { LucideX } from '@lucide/angular';
 import { Subject, takeUntil } from 'rxjs';
 import { mensagemDeErro } from '../../core/errors/mensagens';
 import { AvaliacaoUsuario, ItemWatchlist, Midia } from '../../core/models/catalogo.models';
@@ -12,7 +13,7 @@ import { MovieCardComponent } from '../../shared/components/movie-card/movie-car
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, MovieCardComponent],
+  imports: [CommonModule, RouterModule, MovieCardComponent, LucideX],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit, OnDestroy {
@@ -22,8 +23,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   watchlist = signal<ItemWatchlist[]>([]);
   avaliacoes = signal<AvaliacaoUsuario[]>([]);
-  carregando = signal(true);
-  erro = signal('');
+  carregandoWatchlist = signal(true);
+  carregandoAvaliacoes = signal(true);
+  erroWatchlist = signal('');
+  erroAvaliacoes = signal('');
+  removendo = signal<string | null>(null);
 
   readonly notaMedia = computed(() => {
     const notas = this.avaliacoes()
@@ -46,11 +50,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (itens) => {
           this.watchlist.set(itens);
-          this.carregando.set(false);
+          this.carregandoWatchlist.set(false);
         },
         error: (falha) => {
-          this.erro.set(mensagemDeErro(falha));
-          this.carregando.set(false);
+          this.erroWatchlist.set(mensagemDeErro(falha));
+          this.carregandoWatchlist.set(false);
         },
       });
 
@@ -58,14 +62,42 @@ export class ProfileComponent implements OnInit, OnDestroy {
       .porUsuario(meuId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (lista) => this.avaliacoes.set(lista),
-        error: () => undefined,
+        next: (lista) => {
+          this.avaliacoes.set(lista);
+          this.carregandoAvaliacoes.set(false);
+        },
+        error: (falha) => {
+          this.erroAvaliacoes.set(mensagemDeErro(falha));
+          this.carregandoAvaliacoes.set(false);
+        },
       });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  removerDaWatchlist(item: ItemWatchlist): void {
+    if (this.removendo()) return;
+    this.removendo.set(item.id);
+    this.erroWatchlist.set('');
+
+    const tipo = item.media.type === 'MOVIE' ? 'movie' : 'tv';
+
+    this.watchlistService
+      .remover(item.media.tmdbId, tipo)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.watchlist.update((itens) => itens.filter((i) => i.id !== item.id));
+          this.removendo.set(null);
+        },
+        error: (falha) => {
+          this.erroWatchlist.set(mensagemDeErro(falha));
+          this.removendo.set(null);
+        },
+      });
   }
 
   tipoDeCard(midia: Midia): 'movies' | 'series' {

@@ -8,21 +8,22 @@
         <span class="text-yellow-400">{{ media | number: '1.1-1' }} de nota média</span>
       }
     </div>
-    @if (erro()) {
-      <p class="mt-6 text-sm text-red-400">{{ erro() }}</p>
-    }
   </section>
 
   <section class="px-20 mt-16">
     <h2 class="text-3xl font-bold mb-8 text-white">Sua watchlist</h2>
 
-    @if (carregando()) {
+    @if (erroWatchlist()) {
+      <p class="text-sm text-red-400 mb-6">{{ erroWatchlist() }}</p>
+    }
+
+    @if (carregandoWatchlist()) {
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
         @for (vazio of [1, 2, 3, 4, 5]; track vazio) {
           <div class="aspect-[2/3] rounded-xl bg-[#1a1a1a]"></div>
         }
       </div>
-    } @else if (watchlist().length === 0) {
+    } @else if (watchlist().length === 0 && !erroWatchlist()) {
       <p class="text-gray-400">
         Ainda não há nada aqui. Abra um filme ou série e toque em
         <span class="text-white">Adicionar à watchlist</span>.
@@ -30,21 +31,42 @@
     } @else {
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
         @for (item of watchlist(); track item.id) {
-          <app-movie-card
-            [id]="item.media.tmdbId"
-            [title]="item.media.title"
-            [posterPath]="item.media.posterPath"
-            [year]="ano(item.media)"
-            [mediaType]="tipoDeCard(item.media)">
-          </app-movie-card>
+          <div class="relative group">
+            <app-movie-card
+              [id]="item.media.tmdbId"
+              [title]="item.media.title"
+              [posterPath]="item.media.posterPath"
+              [year]="ano(item.media)"
+              [mediaType]="tipoDeCard(item.media)">
+            </app-movie-card>
+            <button
+              type="button"
+              (click)="removerDaWatchlist(item)"
+              [disabled]="removendo() === item.id"
+              [attr.aria-label]="'Remover ' + item.media.title + ' da watchlist'"
+              class="absolute top-2 right-2 z-10 p-2 rounded-full bg-black/70 text-gray-300 hover:text-white hover:bg-black/90 transition duration-300 cursor-pointer opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-60 disabled:cursor-not-allowed">
+              <svg lucideX [size]="14" strokeWidth="2"></svg>
+            </button>
+          </div>
         }
       </div>
     }
   </section>
 
-  @if (avaliacoes().length > 0) {
-    <section class="px-20 mt-20">
-      <h2 class="text-3xl font-bold mb-8 text-white">Suas avaliações</h2>
+  <section class="px-20 mt-20">
+    <h2 class="text-3xl font-bold mb-8 text-white">Suas avaliações</h2>
+
+    @if (erroAvaliacoes()) {
+      <p class="text-sm text-red-400">{{ erroAvaliacoes() }}</p>
+    } @else if (carregandoAvaliacoes()) {
+      <div class="space-y-6 max-w-4xl">
+        @for (vazio of [1, 2]; track vazio) {
+          <div class="h-28 rounded-xl bg-[#1a1a1a]"></div>
+        }
+      </div>
+    } @else if (avaliacoes().length === 0) {
+      <p class="text-gray-400">Você ainda não avaliou nenhum título.</p>
+    } @else {
       <div class="space-y-6 max-w-4xl">
         @for (avaliacao of avaliacoes(); track avaliacao.id) {
           <article class="bg-[#1a1a1a] rounded-xl p-6">
@@ -67,6 +89,6 @@
           </article>
         }
       </div>
-    </section>
-  }
+    }
+  </section>
 </div>
