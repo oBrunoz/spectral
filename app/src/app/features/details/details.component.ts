@@ -21,6 +21,9 @@ import { SeasonListComponent } from '../../shared/components/season-list/season-
 import { MediaGalleryComponent } from '../../shared/components/media-gallery/media-gallery.component';
 import { ReviewCardComponent } from '../../shared/components/review-card/review-card.component';
 import { MediaActionsComponent } from '../../shared/components/media-actions/media-actions.component';
+import { AvaliacaoService } from '../../core/services/avaliacao.service';
+import { AvaliacaoUsuario } from '../../core/models/catalogo.models';
+import { mensagemDeErro } from '../../core/errors/mensagens';
 import {
   ContentDetails,
   ImageBackdrop,
@@ -75,6 +78,9 @@ const REVIEWS_VAZIAS: TmdbListResponse<Review> = {
 export class DetailsComponent implements OnInit, OnDestroy {
   details = signal<ContentDetails | null>(null);
   reviews = signal<Review[]>([]);
+  avaliacoesPrisma = signal<AvaliacaoUsuario[]>([]);
+  carregandoPrisma = signal(true);
+  erroPrisma = signal('');
   contentType = signal<'movies' | 'series' | 'people'>('movies');
   trailerUrl = signal<string>('#');
   backgroundUrl = signal<string>('');
@@ -88,10 +94,12 @@ export class DetailsComponent implements OnInit, OnDestroy {
   skeletonSimilar = Array(6).fill(0);
 
   private destroy$ = new Subject<void>();
+  private trocaDeTitulo$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
-    private movieService: MovieService
+    private movieService: MovieService,
+    private avaliacaoService: AvaliacaoService
   ) {}
 
   ngOnInit(): void {
@@ -105,6 +113,11 @@ export class DetailsComponent implements OnInit, OnDestroy {
           this.isLoading.set(true);
           this.reviews.set([]);
           this.details.set(null);
+          this.trocaDeTitulo$.next();
+          this.avaliacoesPrisma.set([]);
+          this.erroPrisma.set('');
+          this.carregandoPrisma.set(true);
+          if (type === 'movies' || type === 'series') this.carregarAvaliacoesPrisma(id);
 
           if (type !== 'movies' && type !== 'series') {
             return forkJoin({
@@ -147,8 +160,34 @@ export class DetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.trocaDeTitulo$.next();
+    this.trocaDeTitulo$.complete();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  recarregarAvaliacoesPrisma(): void {
+    const id = this.details()?.id;
+    if (id) this.carregarAvaliacoesPrisma(id);
+  }
+
+  private carregarAvaliacoesPrisma(id: number): void {
+    this.carregandoPrisma.set(true);
+    this.erroPrisma.set('');
+
+    this.avaliacaoService
+      .porTitulo(id, this.apiType())
+      .pipe(takeUntil(this.trocaDeTitulo$), takeUntil(this.destroy$))
+      .subscribe({
+        next: (lista) => {
+          this.avaliacoesPrisma.set(lista);
+          this.carregandoPrisma.set(false);
+        },
+        error: (falha) => {
+          this.erroPrisma.set(mensagemDeErro(falha));
+          this.carregandoPrisma.set(false);
+        },
+      });
   }
 
   /** Prioriza logo em português, depois inglês. */
