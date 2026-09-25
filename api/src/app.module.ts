@@ -5,6 +5,7 @@ import { validate } from './config/env.validation.js';
 import { HealthModule } from './health/health.module.js';
 import { MediaModule } from './media/media.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { ReviewModule } from './review/review.module.js';
 import { TmdbModule } from './tmdb/tmdb.module.js';
 import { UserModule } from './user/user.module.js';
 import { WatchlistModule } from './watchlist/watchlist.module.js';
@@ -19,6 +20,7 @@ import { WatchlistModule } from './watchlist/watchlist.module.js';
     TmdbModule,
     MediaModule,
     WatchlistModule,
+    ReviewModule,
   ],
 })
 export class AppModule {}
