@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { validate } from './config/env.validation.js';
 import { HealthModule } from './health/health.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { TmdbModule } from './tmdb/tmdb.module.js';
 import { UserModule } from './user/user.module.js';
 
 @Module({
@@ -13,6 +14,7 @@ import { UserModule } from './user/user.module.js';
     HealthModule,
     UserModule,
     AuthModule,
+    TmdbModule,
   ],
 })
 export class AppModule {}
