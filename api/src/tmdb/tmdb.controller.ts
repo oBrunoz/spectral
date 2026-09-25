@@ -6,6 +6,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { LIMITE_TMDB } from '../common/rate-limit.js';
 import { TmdbService } from './tmdb.service.js';
 
 const PREFIXOS_PERMITIDOS = new Set([
@@ -28,7 +29,7 @@ const MAX_SEGMENTOS = 6;
 export class TmdbController {
   constructor(private readonly tmdb: TmdbService) {}
 
-  @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  @Throttle({ default: LIMITE_TMDB })
   @Get('*path')
   proxy(
     @Param('path') path: string[],

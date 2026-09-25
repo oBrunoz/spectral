@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module.js';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter.js';
+import { LIMITE_GERAL } from './common/rate-limit.js';
 import { validate } from './config/env.validation.js';
 import { FollowModule } from './follow/follow.module.js';
 import { HealthModule } from './health/health.module.js';
@@ -17,7 +18,7 @@ import { WatchlistModule } from './watchlist/watchlist.module.js';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate }),
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
+    ThrottlerModule.forRoot([LIMITE_GERAL]),
     PrismaModule,
     HealthModule,
     UserModule,

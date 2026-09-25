@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
+import { LIMITE_LOGIN } from '../common/rate-limit.js';
 import type { CookieOptions, Request, Response } from 'express';
 import { CreateUserDto } from '../user/dto/create-user.dto.js';
 import { PublicUserDto } from '../user/dto/public-user.dto.js';
@@ -41,7 +42,7 @@ export class AuthController {
     return this.authService.me(payload.sub);
   }
 
-  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @Throttle({ default: LIMITE_LOGIN })
   @Post('register')
   async register(
     @Body() dto: CreateUserDto,
@@ -50,7 +51,7 @@ export class AuthController {
     return this.emitSession(await this.authService.register(dto), res);
   }
 
-  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @Throttle({ default: LIMITE_LOGIN })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
