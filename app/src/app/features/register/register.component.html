@@ -10,7 +10,7 @@
   </div>
 
   <div class="container mx-auto px-4 sm:px-6 relative z-20 flex-grow flex items-center justify-center py-16 sm:py-20">
-    <div class="bg-gray-900/90 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-md">
+    <div class="bg-[#111111]/90 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-md">
       <div class="text-center mb-6">
         <h1 class="text-3xl font-bold text-white">Criar conta</h1>
         <p class="text-sm text-gray-400 mt-2">Comece a acompanhar seus filmes favoritos</p>
@@ -30,7 +30,7 @@
               [ngModel]="name()"
               (ngModelChange)="name.set($event)"
               name="name"
-              class="bg-gray-800 text-white placeholder-gray-500 pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full"
+              class="bg-[#1a1a1a] text-white placeholder-gray-500 pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full"
               placeholder="Seu nome"
               autocomplete="name"
               required
@@ -51,7 +51,7 @@
               [ngModel]="email()"
               (ngModelChange)="email.set($event)"
               name="email"
-              class="bg-gray-800 text-white placeholder-gray-500 pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full"
+              class="bg-[#1a1a1a] text-white placeholder-gray-500 pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full"
               placeholder="voce@email.com"
               autocomplete="email"
               required
@@ -72,7 +72,7 @@
               [ngModel]="password()"
               (ngModelChange)="password.set($event)"
               name="password"
-              class="bg-gray-800 text-white placeholder-gray-500 pl-10 pr-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full"
+              class="bg-[#1a1a1a] text-white placeholder-gray-500 pl-10 pr-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 w-full"
               placeholder="••••••••"
               autocomplete="new-password"
               required
@@ -100,7 +100,7 @@
         <button
           type="submit"
           [disabled]="enviando()"
-          class="w-full cursor-pointer bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-300 text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed">
+          class="w-full cursor-pointer bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition duration-300 text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed">
           {{ enviando() ? 'Criando...' : 'Criar conta' }}
         </button>
       </form>
