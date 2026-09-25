@@ -1,9 +1,12 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   Input,
   OnChanges,
+  Output,
+  EventEmitter,
   OnDestroy,
   inject,
   signal,
@@ -39,6 +42,9 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) tmdbId!: number;
   @Input({ required: true }) mediaType!: TipoMidia;
 
+  // o pai lista as avaliacoes publicas e precisa refletir a do usuario na hora
+  @Output() avaliacaoAlterada = new EventEmitter<void>();
+
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly watchlist = inject(WatchlistService);
@@ -62,6 +68,7 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
   erroCarga = signal('');
   erro = signal('');
   confirmacao = signal('');
+  confirmandoExclusao = signal(false);
 
   // emite a cada troca de título para descartar respostas da carga anterior
   private cancelarCarga$ = new Subject<void>();
@@ -98,13 +105,20 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
       ? this.watchlist.remover(this.tmdbId, this.mediaType)
       : this.watchlist.adicionar(this.tmdbId, this.mediaType);
 
-    acao.pipe(takeUntil(this.destroy$)).subscribe({
+    const queria = !this.naWatchlist();
+
+    acao.pipe(takeUntil(this.cancelarCarga$), takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.naWatchlist.update((v) => !v);
+        this.naWatchlist.set(queria);
         this.salvandoWatchlist.set(false);
       },
       error: (falha) => {
-        this.erro.set(mensagemDeErro(falha));
+        // 404 ao remover significa que ja nao estava la: o botao e que estava errado
+        if (falha instanceof HttpErrorResponse && falha.status === 404 && !queria) {
+          this.naWatchlist.set(false);
+        } else {
+          this.erro.set(mensagemDeErro(falha));
+        }
         this.salvandoWatchlist.set(false);
       },
     });
@@ -122,6 +136,7 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
     this.salvandoAvaliacao.set(true);
     this.erro.set('');
     this.confirmacao.set('');
+    this.confirmandoExclusao.set(false);
 
     this.avaliacoes
       .salvar({
@@ -130,12 +145,13 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
         ...(this.nota() !== null && { rating: this.nota()! }),
         ...(conteudo !== '' && { content: conteudo }),
       })
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.cancelarCarga$), takeUntil(this.destroy$))
       .subscribe({
         next: (salva) => {
           this.avaliacaoId.set(salva.id);
           this.confirmacao.set('Avaliação salva.');
           this.salvandoAvaliacao.set(false);
+          this.avaliacaoAlterada.emit();
         },
         error: (falha) => {
           this.erro.set(mensagemDeErro(falha));
@@ -148,10 +164,16 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
     const id = this.avaliacaoId();
     if (!id || this.salvandoAvaliacao()) return;
 
+    if (!this.confirmandoExclusao()) {
+      this.confirmandoExclusao.set(true);
+      return;
+    }
+
+    this.confirmandoExclusao.set(false);
     this.salvandoAvaliacao.set(true);
     this.avaliacoes
       .remover(id)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.cancelarCarga$), takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.avaliacaoId.set(null);
@@ -159,6 +181,7 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
           this.texto.set('');
           this.confirmacao.set('Avaliação removida.');
           this.salvandoAvaliacao.set(false);
+          this.avaliacaoAlterada.emit();
         },
         error: (falha) => {
           this.erro.set(mensagemDeErro(falha));
@@ -199,6 +222,7 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
   private limparEstado(): void {
     this.naWatchlist.set(false);
     this.nota.set(null);
+    this.notaVisualizada.set(null);
     this.texto.set('');
     this.avaliacaoId.set(null);
     this.carregando.set(false);
@@ -207,5 +231,6 @@ export class MediaActionsComponent implements OnChanges, OnDestroy {
     this.erroCarga.set('');
     this.erro.set('');
     this.confirmacao.set('');
+    this.confirmandoExclusao.set(false);
   }
 }

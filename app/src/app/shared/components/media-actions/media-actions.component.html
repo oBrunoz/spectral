@@ -74,17 +74,27 @@
           type="button"
           (click)="apagarAvaliacao()"
           [disabled]="salvandoAvaliacao()"
-          class="text-sm text-gray-400 hover:text-white transition duration-300 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+          class="text-sm transition duration-300 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+          [class]="confirmandoExclusao() ? 'text-red-400 hover:text-red-300' : 'text-gray-400 hover:text-white'">
           <svg lucideTrash2 [size]="14" strokeWidth="2"></svg>
-          Remover
+          {{ confirmandoExclusao() ? 'Confirmar remoção' : 'Remover' }}
         </button>
+
+        @if (confirmandoExclusao()) {
+          <button
+            type="button"
+            (click)="confirmandoExclusao.set(false)"
+            class="text-sm text-gray-400 hover:text-white transition duration-300 cursor-pointer">
+            Cancelar
+          </button>
+        }
       }
 
       @if (confirmacao()) {
-        <span class="text-sm text-gray-400">{{ confirmacao() }}</span>
+        <span class="text-sm text-gray-400" role="status">{{ confirmacao() }}</span>
       }
       @if (erro()) {
-        <span class="text-sm text-red-400">{{ erro() }}</span>
+        <span class="text-sm text-red-400" role="alert">{{ erro() }}</span>
       }
     </div>
 
