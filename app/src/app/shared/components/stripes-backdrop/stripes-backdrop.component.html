@@ -1,5 +1,7 @@
 <!--
-  Uma única fita com as seis faixas do espectro da marca atravessando a página.
+  Uma única fita de listras anos 70 (violeta → carmim) atravessando a página.
+  As cores já vêm envelhecidas (sepia 0.18 + saturate 0.92 aplicados no hex);
+  um filter CSS tingiria também a faixa de corte e ela apareceria.
 
   O viewBox é "percentual": 100 unidades de largura, 1000 de altura, esticado
   para o tamanho do documento com preserveAspectRatio="none". Como os traços
@@ -8,9 +10,11 @@
   curva a uma região da página (y=200 é sempre a área das listas, y=560 é
   sempre o CTA) sem nenhum JavaScript.
 
-  Os fios são o mesmo traçado deslocado no eixo X. Como a trajetória é
-  predominantemente vertical, o deslocamento horizontal mantém o paralelismo
-  visual e ainda aperta o feixe em telas estreitas, onde ele deve pesar menos.
+  As faixas são o mesmo traçado deslocado no eixo X (via --i, no CSS), coladas
+  umas nas outras como as listras dos anos 70: a espessura em vw acompanha o
+  deslocamento em % de largura, então não sobra vão entre elas em nenhuma tela.
+  Cada faixa cobre a sobra da anterior; nas diagonais elas afinam um pouco,
+  o que mantém a leitura de fita única.
 -->
 <svg
   class="ribbon"
@@ -19,15 +23,69 @@
   fill="none"
   aria-hidden="true">
 
-  <g
-    stroke-width="8"
-    stroke-linecap="round"
-    vector-effect="non-scaling-stroke">
+  <g stroke-linecap="round">
 
-    <!-- VERMELHO -->
+    <!-- VIOLETA -->
     <path
-      class="wire wire--1"
-      stroke="#c8635a"
+      class="wire" style="--i: 0"
+      stroke="#45417c"
+      vector-effect="non-scaling-stroke"
+      d="
+        M 50 -80
+        C 50 40, 52 100, 62 180
+        C 72 260, 88 300, 86 380
+        C 84 470, 65 520, 45 590
+        C 25 660, 12 720, 18 800
+        C 24 880, 48 920, 67 990
+        C 84 1055, 86 1110, 70 1180
+        C 54 1250, 28 1290, 22 1360
+        C 15 1440, 32 1495, 50 1560
+        C 65 1615, 66 1670, 56 1740
+        C 53 1765, 51 1790, 50 1880
+      " />
+
+    <!-- AZUL -->
+    <path
+      class="wire" style="--i: 1"
+      stroke="#2880a8"
+      vector-effect="non-scaling-stroke"
+      d="
+        M 50 -80
+        C 50 40, 52 100, 62 180
+        C 72 260, 88 300, 86 380
+        C 84 470, 65 520, 45 590
+        C 25 660, 12 720, 18 800
+        C 24 880, 48 920, 67 990
+        C 84 1055, 86 1110, 70 1180
+        C 54 1250, 28 1290, 22 1360
+        C 15 1440, 32 1495, 50 1560
+        C 65 1615, 66 1670, 56 1740
+        C 53 1765, 51 1790, 50 1880
+      " />
+
+    <!-- CIANO -->
+    <path
+      class="wire" style="--i: 2"
+      stroke="#78c4c4"
+      vector-effect="non-scaling-stroke"
+      d="
+        M 50 -80
+        C 50 40, 52 100, 62 180
+        C 72 260, 88 300, 86 380
+        C 84 470, 65 520, 45 590
+        C 25 660, 12 720, 18 800
+        C 24 880, 48 920, 67 990
+        C 84 1055, 86 1110, 70 1180
+        C 54 1250, 28 1290, 22 1360
+        C 15 1440, 32 1495, 50 1560
+        C 65 1615, 66 1670, 56 1740
+        C 53 1765, 51 1790, 50 1880
+      " />
+
+    <!-- CREME -->
+    <path
+      class="wire" style="--i: 3"
+      stroke="#f0e0c5"
       vector-effect="non-scaling-stroke"
       d="
         M 50 -80
@@ -45,10 +103,9 @@
 
     <!-- LARANJA -->
     <path
-      class="wire wire--2"
-      stroke="#d9905e"
+      class="wire" style="--i: 4"
+      stroke="#eca352"
       vector-effect="non-scaling-stroke"
-      transform="translate(1.5 0)"
       d="
         M 50 -80
         C 50 40, 52 100, 62 180
@@ -63,12 +120,11 @@
         C 53 1765, 51 1790, 50 1880
       " />
 
-    <!-- AMARELO -->
+    <!-- CORAL -->
     <path
-      class="wire wire--3"
-      stroke="#e2c27d"
+      class="wire" style="--i: 5"
+      stroke="#d85057"
       vector-effect="non-scaling-stroke"
-      transform="translate(3 0)"
       d="
         M 50 -80
         C 50 40, 52 100, 62 180
@@ -83,12 +139,11 @@
         C 53 1765, 51 1790, 50 1880
       " />
 
-    <!-- VERDE -->
+    <!-- CARMIM -->
     <path
-      class="wire wire--4"
-      stroke="#8fae8b"
+      class="wire" style="--i: 6"
+      stroke="#942548"
       vector-effect="non-scaling-stroke"
-      transform="translate(4.5 0)"
       d="
         M 50 -80
         C 50 40, 52 100, 62 180
@@ -103,32 +158,11 @@
         C 53 1765, 51 1790, 50 1880
       " />
 
-    <!-- AZUL -->
+    <!-- CORTE: cor do body; apara a última faixa na largura das outras (a opacidade é do svg inteiro, então não aparece) -->
     <path
-      class="wire wire--5"
-      stroke="#6e8fa8"
+      class="wire" style="--i: 7"
+      stroke="#111111"
       vector-effect="non-scaling-stroke"
-      transform="translate(6 0)"
-      d="
-        M 50 -80
-        C 50 40, 52 100, 62 180
-        C 72 260, 88 300, 86 380
-        C 84 470, 65 520, 45 590
-        C 25 660, 12 720, 18 800
-        C 24 880, 48 920, 67 990
-        C 84 1055, 86 1110, 70 1180
-        C 54 1250, 28 1290, 22 1360
-        C 15 1440, 32 1495, 50 1560
-        C 65 1615, 66 1670, 56 1740
-        C 53 1765, 51 1790, 50 1880
-      " />
-
-    <!-- VIOLETA -->
-    <path
-      class="wire wire--6"
-      stroke="#9a84a8"
-      vector-effect="non-scaling-stroke"
-      transform="translate(7.5 0)"
       d="
         M 50 -80
         C 50 40, 52 100, 62 180

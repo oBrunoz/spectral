@@ -17,38 +17,45 @@
   overflow: hidden;
 }
 
+/* min-height: em páginas curtas (login, cadastro) a camada tem só a altura do
+   footer e o traçado inteiro se achataria nela. Com a proporção travada, a fita
+   mantém as curvas e o :host corta o que passar do fim da página. */
 .ribbon {
   width: 100%;
   height: 100%;
-  opacity: 0.1;
-  /* fade curto no topo (a fita surge logo abaixo do hero, como se viesse de
-     trás dele) e longo embaixo, para morrer suavemente no footer */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 3%,
-    #000 90%,
-    transparent 99%
-  );
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 3%, #000 90%, transparent 99%);
+  min-height: 350vw;
+  opacity: 0.45;
+
+  /* duas camadas de máscara, intersectadas:
+     1. fade curto no topo (a fita surge logo abaixo do hero, como se viesse de
+        trás dele) e longo embaixo, para morrer suavemente no footer;
+     2. grão: um ladrilho de ruído de 240px que abre furos na tinta, como
+        serigrafia gasta. Ladrilho em vez de filtro no SVG: a camada tem a
+        altura do documento e um feTurbulence nela custaria caro. */
+  --grao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -4 3.7'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+  --fade: linear-gradient(to bottom, transparent 0%, #000 3%, #000 90%, transparent 99%);
+  -webkit-mask-image: var(--fade), var(--grao);
+  mask-image: var(--fade), var(--grao);
+  -webkit-mask-size: 100% 100%, 240px 240px;
+  mask-size: 100% 100%, 240px 240px;
+  -webkit-mask-repeat: no-repeat, repeat;
+  mask-repeat: no-repeat, repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 
-/* Tablet: o feixe já aperta sozinho (o viewBox é percentual),
-   então basta tirar um pouco de presença. */
-@media (max-width: 1023px) {
-  .ribbon {
-    opacity: 0.16;
-  }
+/* --passo é a largura de cada faixa em % da tela: o deslocamento usa unidades
+   do viewBox (1 = 1% da largura) e a espessura usa vw, então as duas andam
+   juntas. O +1px cobre o arredondamento; a fita fica centrada no traçado. */
+.wire {
+  --passo: 2.4;
+  stroke-width: calc(var(--passo) * 1vw + 1px);
+  transform: translateX(calc((var(--i) - 3) * var(--passo) * 1px));
 }
 
-/* Mobile: as seis faixas ficam (é o espectro da marca), mas mais finas —
-   o deslocamento em % aperta o feixe e os traços de 8px se sobreporiam. */
+/* Mobile: faixas proporcionalmente mais largas, senão viram fios. */
 @media (max-width: 639px) {
-  .ribbon {
-    opacity: 0.14;
-  }
-
   .wire {
-    stroke-width: 5px;
+    --passo: 3.6;
   }
 }
