@@ -22,9 +22,12 @@ export class TokenService {
   ) {}
 
   async issue(userId: string): Promise<TokenPair> {
-    const accessToken = await this.jwt.signAsync({ sub: userId } satisfies AccessTokenPayload, {
-      expiresIn: ACCESS_TOKEN_TTL,
-    });
+    const accessToken = await this.jwt.signAsync(
+      { sub: userId } satisfies AccessTokenPayload,
+      {
+        expiresIn: ACCESS_TOKEN_TTL,
+      },
+    );
 
     const refreshToken = randomBytes(48).toString('base64url');
     const refreshExpiresAt = new Date(
@@ -32,7 +35,11 @@ export class TokenService {
     );
 
     await this.prisma.refreshToken.create({
-      data: { userId, tokenHash: TokenService.hash(refreshToken), expiresAt: refreshExpiresAt },
+      data: {
+        userId,
+        tokenHash: TokenService.hash(refreshToken),
+        expiresAt: refreshExpiresAt,
+      },
     });
 
     return { accessToken, refreshToken, refreshExpiresAt };

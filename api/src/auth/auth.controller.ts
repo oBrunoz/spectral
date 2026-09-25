@@ -3,7 +3,9 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Get,
   Post,
+  UseGuards,
   Req,
   Res,
   UnauthorizedException,
@@ -15,7 +17,10 @@ import { PublicUserDto } from '../user/dto/public-user.dto.js';
 import { REFRESH_COOKIE, REFRESH_COOKIE_PATH } from './auth.constants.js';
 import { AuthResult, AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
+import type { AccessTokenPayload } from './token.service.js';
 import { TokenPair } from './token.service.js';
+import { CurrentUser } from './decorators/current-user.decorator.js';
+import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 
 interface SessionResponse {
   user?: PublicUserDto;
@@ -28,6 +33,12 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly config: ConfigService,
   ) {}
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async me(@CurrentUser() payload: AccessTokenPayload): Promise<PublicUserDto> {
+    return this.authService.me(payload.sub);
+  }
 
   @Post('register')
   async register(
@@ -59,7 +70,10 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
     const cookie = req.cookies?.[REFRESH_COOKIE] as string | undefined;
     if (cookie) {
       await this.authService.logout(cookie);
@@ -67,7 +81,10 @@ export class AuthController {
     res.clearCookie(REFRESH_COOKIE, { path: REFRESH_COOKIE_PATH });
   }
 
-  private emitSession({ user, tokens }: AuthResult, res: Response): SessionResponse {
+  private emitSession(
+    { user, tokens }: AuthResult,
+    res: Response,
+  ): SessionResponse {
     this.setRefreshCookie(res, tokens);
     return { user, accessToken: tokens.accessToken };
   }
@@ -82,7 +99,8 @@ export class AuthController {
 
   // httpOnly: JavaScript da pagina nao le. e a defesa contra XSS roubar a sessao.
   private setRefreshCookie(res: Response, tokens: TokenPair): void {
-    const producao = this.config.getOrThrow<string>('NODE_ENV') === 'production';
+    const producao =
+      this.config.getOrThrow<string>('NODE_ENV') === 'production';
     const options: CookieOptions = {
       httpOnly: true,
       secure: producao,

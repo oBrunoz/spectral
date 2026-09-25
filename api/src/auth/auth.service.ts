@@ -17,6 +17,10 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) {}
 
+  async me(userId: string): Promise<PublicUserDto> {
+    return await this.userService.findPublicById(userId);
+  }
+
   async register(dto: CreateUserDto): Promise<AuthResult> {
     const user = await this.userService.create(dto);
     return { user, tokens: await this.tokenService.issue(user.id) };
@@ -31,7 +35,10 @@ export class AuthService {
       throw new UnauthorizedException('E-mail ou senha invalidos');
     }
 
-    return { user: UserService.toPublic(user), tokens: await this.tokenService.issue(user.id) };
+    return {
+      user: UserService.toPublic(user),
+      tokens: await this.tokenService.issue(user.id),
+    };
   }
 
   refresh(refreshToken: string): Promise<TokenPair> {
