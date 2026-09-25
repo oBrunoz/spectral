@@ -2,7 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AvaliacaoUsuario, EnvioAvaliacao, TipoMidia } from '../models/catalogo.models';
+import {
+  AvaliacaoUsuario,
+  EnvioAvaliacao,
+  EstatisticasMidia,
+  TipoMidia,
+} from '../models/catalogo.models';
 
 @Injectable({ providedIn: 'root' })
 export class AvaliacaoService {
@@ -21,8 +26,13 @@ export class AvaliacaoService {
     return this.http.get<AvaliacaoUsuario[]>(`${this.base}/user/${userId}?limit=${limite}`);
   }
 
-  salvar(envio: EnvioAvaliacao): Observable<AvaliacaoUsuario> {
-    return this.http.post<AvaliacaoUsuario>(this.base, envio);
+  estatisticas(tmdbId: number, tipo: TipoMidia): Observable<EstatisticasMidia> {
+    return this.http.get<EstatisticasMidia>(`${this.base}/media/${tipo}/${tmdbId}/stats`);
+  }
+
+  // devolve null quando a ficha fica vazia e o backend apaga a avaliação
+  salvar(envio: EnvioAvaliacao): Observable<AvaliacaoUsuario | null> {
+    return this.http.post<AvaliacaoUsuario | null>(this.base, envio);
   }
 
   remover(id: string): Observable<void> {

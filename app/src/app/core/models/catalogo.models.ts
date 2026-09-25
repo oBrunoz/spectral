@@ -25,15 +25,26 @@ export interface AvaliacaoUsuario {
   id: string;
   rating: number | null;
   content: string | null;
+  liked: boolean;
   watchedAt: string | null;
   createdAt: string;
   media?: Midia;
   user?: AutorResumo;
 }
 
+// o corpo carrega a ficha inteira: o backend substitui, e tudo vazio apaga
 export interface EnvioAvaliacao {
   tmdbId: number;
   mediaType: TipoMidia;
   rating?: number;
   content?: string;
+  liked?: boolean;
+  watched?: boolean;
+}
+
+export interface EstatisticasMidia {
+  total: number;
+  notaMedia: number | null;
+  curtidas: number;
+  distribuicao: number[];
 }

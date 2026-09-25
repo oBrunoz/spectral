@@ -2,12 +2,25 @@ import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Subject, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { AvaliacaoService } from '../../../core/services/avaliacao.service';
-import { AvaliacaoUsuario, ItemWatchlist } from '../../../core/models/catalogo.models';
+import {
+  AvaliacaoUsuario,
+  EnvioAvaliacao,
+  ItemWatchlist,
+} from '../../../core/models/catalogo.models';
 import { WatchlistService } from '../../../core/services/watchlist.service';
 import { MediaActionsComponent } from './media-actions.component';
+
+const AVALIACAO: AvaliacaoUsuario = {
+  id: 'r1',
+  rating: null,
+  content: null,
+  liked: false,
+  watchedAt: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+};
 
 describe('MediaActionsComponent', () => {
   let fixture: ComponentFixture<MediaActionsComponent>;
@@ -22,8 +35,8 @@ describe('MediaActionsComponent', () => {
 
   beforeEach(async () => {
     contem$ = new Subject();
-    cargasDeAvaliacao = [];
     adicionar$ = new Subject();
+    cargasDeAvaliacao = [];
 
     watchlist = jasmine.createSpyObj<WatchlistService>('WatchlistService', [
       'contem',
@@ -35,6 +48,7 @@ describe('MediaActionsComponent', () => {
 
     avaliacoes = jasmine.createSpyObj<AvaliacaoService>('AvaliacaoService', [
       'minhaNoTitulo',
+      'estatisticas',
       'salvar',
       'remover',
     ]);
@@ -44,6 +58,7 @@ describe('MediaActionsComponent', () => {
       cargasDeAvaliacao.push(carga);
       return carga;
     });
+    avaliacoes.salvar.and.returnValue(of(AVALIACAO));
 
     await TestBed.configureTestingModule({
       imports: [MediaActionsComponent],
@@ -73,61 +88,153 @@ describe('MediaActionsComponent', () => {
     fixture.detectChanges();
   }
 
-  it('não deixa o botão preso quando o item já não está na watchlist', () => {
-    abrirTitulo(1);
-    contem$.next({ present: true });
-    expect(componente.naWatchlist()).toBeTrue();
+  function ultimoEnvio(): EnvioAvaliacao {
+    return avaliacoes.salvar.calls.mostRecent().args[0];
+  }
 
-    watchlist.remover.and.returnValue(
-      throwError(() => new HttpErrorResponse({ status: 404 })),
-    );
-    componente.alternarWatchlist();
+  describe('watchlist', () => {
+    it('não deixa o botão preso quando o item já não está na watchlist', () => {
+      abrirTitulo(1);
+      contem$.next({ present: true });
+      expect(componente.naWatchlist()).toBeTrue();
 
-    // 404 no remover quer dizer que já saiu: o estado visual é que estava errado
-    expect(componente.naWatchlist()).toBeFalse();
-    expect(componente.erro()).toBe('');
-    expect(componente.salvandoWatchlist()).toBeFalse();
-  });
+      watchlist.remover.and.returnValue(throwError(() => new HttpErrorResponse({ status: 404 })));
+      componente.alternarWatchlist();
 
-  it('descarta a resposta da watchlist quando o título já mudou', () => {
-    abrirTitulo(1);
-    contem$.next({ present: false });
-
-    componente.alternarWatchlist();
-    abrirTitulo(2);
-
-    // resposta do título 1 chegando depois da troca
-    adicionar$.next({} as ItemWatchlist);
-
-    expect(componente.naWatchlist()).toBeFalse();
-  });
-
-  it('descarta a avaliação do título anterior', () => {
-    abrirTitulo(1);
-    abrirTitulo(2);
-
-    cargasDeAvaliacao[0].next({
-      id: 'r1',
-      rating: 9,
-      content: 'do título antigo',
-      watchedAt: null,
-      createdAt: '2026-01-01T00:00:00.000Z',
+      // 404 no remover quer dizer que já saiu: o estado visual é que estava errado
+      expect(componente.naWatchlist()).toBeFalse();
+      expect(componente.erro()).toBe('');
+      expect(componente.salvandoWatchlist()).toBeFalse();
     });
 
-    expect(componente.avaliacaoId()).toBeNull();
-    expect(componente.texto()).toBe('');
+    it('descarta a resposta da watchlist quando o título já mudou', () => {
+      abrirTitulo(1);
+      contem$.next({ present: false });
+
+      componente.alternarWatchlist();
+      abrirTitulo(2);
+
+      // resposta do título 1 chegando depois da troca
+      adicionar$.next({} as ItemWatchlist);
+
+      expect(componente.naWatchlist()).toBeFalse();
+    });
   });
 
-  it('exige confirmação antes de excluir a avaliação', () => {
-    abrirTitulo(1);
-    componente.avaliacaoId.set('r1');
+  describe('nota', () => {
+    it('mapeia meia estrela para nota ímpar e estrela cheia para par', () => {
+      abrirTitulo(1);
 
-    componente.apagarAvaliacao();
-    expect(avaliacoes.remover).not.toHaveBeenCalled();
-    expect(componente.confirmandoExclusao()).toBeTrue();
+      componente.nota.set(7);
+      expect(componente.preenchimento(3)).toBe('cheia');
+      expect(componente.preenchimento(4)).toBe('meia');
+      expect(componente.preenchimento(5)).toBe('vazia');
 
-    avaliacoes.remover.and.returnValue(new Subject<void>());
-    componente.apagarAvaliacao();
-    expect(avaliacoes.remover).toHaveBeenCalledWith('r1');
+      componente.nota.set(10);
+      expect(componente.preenchimento(5)).toBe('cheia');
+    });
+
+    it('desenha a meia estrela com metade da largura', () => {
+      abrirTitulo(1);
+      cargasDeAvaliacao[0].next({ ...AVALIACAO, rating: 7 });
+      fixture.detectChanges();
+
+      const raiz = fixture.nativeElement as HTMLElement;
+      const larguras = Array.from(
+        raiz.querySelectorAll<HTMLElement>('.text-yellow-400.absolute'),
+      ).map((el) => el.style.width);
+
+      // nota 7 = três estrelas cheias e uma pela metade; a quinta nem é desenhada
+      expect(larguras).toEqual(['100%', '100%', '100%', '50%']);
+    });
+
+    it('marca como assistido e envia a ficha inteira ao dar nota', () => {
+      abrirTitulo(1);
+      cargasDeAvaliacao[0].next(null);
+
+      componente.definirNota(8);
+
+      expect(componente.assistido()).toBeTrue();
+      expect(ultimoEnvio()).toEqual({
+        tmdbId: 1,
+        mediaType: 'movie',
+        liked: false,
+        watched: true,
+        rating: 8,
+      });
+    });
+
+    it('limpa a nota ao clicar de novo no mesmo valor', () => {
+      abrirTitulo(1);
+      cargasDeAvaliacao[0].next(null);
+
+      componente.definirNota(8);
+      componente.definirNota(8);
+
+      expect(componente.nota()).toBeNull();
+      expect(ultimoEnvio().rating).toBeUndefined();
+    });
+  });
+
+  describe('gravação', () => {
+    it('desfaz o estado visual quando a gravação falha', () => {
+      abrirTitulo(1);
+      cargasDeAvaliacao[0].next({ ...AVALIACAO, rating: 6, watchedAt: '2026-01-01T00:00:00.000Z' });
+      expect(componente.nota()).toBe(6);
+
+      avaliacoes.salvar.and.returnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
+      componente.definirNota(10);
+
+      // volta para a última ficha que o servidor confirmou
+      expect(componente.nota()).toBe(6);
+      expect(componente.erro()).toBeTruthy();
+      expect(componente.salvandoFicha()).toBeFalse();
+    });
+
+    it('esquece a avaliação quando o backend apaga a ficha vazia', () => {
+      abrirTitulo(1);
+      cargasDeAvaliacao[0].next({ ...AVALIACAO, rating: 6 });
+
+      avaliacoes.salvar.and.returnValue(of(null));
+      componente.apagarFicha();
+      componente.apagarFicha();
+
+      expect(componente.avaliacaoId()).toBeNull();
+      expect(componente.nota()).toBeNull();
+      expect(componente.confirmacao()).toBe('Avaliação removida.');
+    });
+
+    it('exige confirmação antes de apagar a ficha', () => {
+      abrirTitulo(1);
+      cargasDeAvaliacao[0].next({ ...AVALIACAO, rating: 6 });
+
+      componente.apagarFicha();
+
+      expect(avaliacoes.salvar).not.toHaveBeenCalled();
+      expect(componente.confirmandoExclusao()).toBeTrue();
+      expect(componente.nota()).toBe(6);
+    });
+
+    it('descarta a avaliação do título anterior', () => {
+      abrirTitulo(1);
+      abrirTitulo(2);
+
+      cargasDeAvaliacao[0].next({ ...AVALIACAO, rating: 9, content: 'do título antigo' });
+
+      expect(componente.avaliacaoId()).toBeNull();
+      expect(componente.texto()).toBe('');
+    });
+  });
+
+  describe('compartilhar', () => {
+    it('avisa quando o link foi copiado', async () => {
+      abrirTitulo(1);
+      spyOn(navigator.clipboard, 'writeText').and.resolveTo();
+
+      componente.copiarLink();
+      await fixture.whenStable();
+
+      expect(componente.linkCopiado()).toBeTrue();
+    });
   });
 });

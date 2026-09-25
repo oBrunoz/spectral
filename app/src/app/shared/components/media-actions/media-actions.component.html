@@ -8,100 +8,170 @@
     </a>
     para dar nota, escrever e montar sua watchlist.
   </p>
+
+  <button
+    type="button"
+    (click)="copiarLink()"
+    class="mt-6 text-sm text-gray-400 hover:text-white transition duration-300 flex items-center gap-2 cursor-pointer">
+    <svg lucideLink [size]="14" strokeWidth="2"></svg>
+    {{ linkCopiado() ? 'Link copiado' : 'Copiar link' }}
+  </button>
 } @else {
-  <div class="flex flex-wrap items-center gap-4">
-    <button
-      type="button"
-      (click)="alternarWatchlist()"
-      [disabled]="salvandoWatchlist() || carregando()"
-      class="px-6 py-3 rounded-full transition duration-300 flex items-center gap-2 text-sm font-medium cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-      [class]="naWatchlist() ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-red-600 hover:bg-red-700 text-white'">
-      @if (naWatchlist()) {
-        <svg lucideCheck [size]="16" strokeWidth="2"></svg>
-        Na sua watchlist
-      } @else {
-        <svg lucideBookmark [size]="16" strokeWidth="2"></svg>
-        Adicionar à watchlist
-      }
-    </button>
-
-    <div class="flex items-center gap-3">
-      <span class="text-sm text-gray-400">Sua nota</span>
-      <div class="flex items-center gap-1" (mouseleave)="notaVisualizada.set(null)">
-        @for (valor of notas; track valor) {
-          <button
-            type="button"
-            (click)="definirNota(valor)"
-            (mouseenter)="notaVisualizada.set(valor)"
-            [disabled]="carregando()"
-            [attr.aria-label]="'Dar nota ' + valor"
-            [attr.aria-pressed]="nota() === valor"
-            class="cursor-pointer transition duration-300 disabled:cursor-not-allowed"
-            [class]="estrelaAtiva(valor) ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'">
-            <svg lucideStar [size]="18" strokeWidth="2" [attr.fill]="estrelaAtiva(valor) ? 'currentColor' : 'none'"></svg>
-          </button>
-        }
-      </div>
-      @if (nota()) {
-        <span class="text-sm text-yellow-400">{{ nota() }}/10</span>
-      }
-    </div>
-  </div>
-
-  <div class="mt-6 max-w-3xl">
-    <label for="texto-avaliacao" class="sr-only">Sua avaliação em texto</label>
-    <textarea
-      id="texto-avaliacao"
-      [ngModel]="texto()"
-      (ngModelChange)="texto.set($event)"
-      [disabled]="carregando()"
-      rows="4"
-      maxlength="5000"
-      [placeholder]="carregando() ? 'Carregando sua avaliação...' : 'O que você achou? (opcional)'"
-      class="w-full bg-[#1a1a1a] text-white placeholder-gray-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 resize-y disabled:opacity-60"></textarea>
-
-    <div class="mt-4 flex flex-wrap items-center gap-4">
-      <button
-        type="button"
-        (click)="salvarAvaliacao()"
-        [disabled]="salvandoAvaliacao() || carregando()"
-        class="px-6 py-3 rounded-full transition duration-300 flex items-center text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
-        {{ salvandoAvaliacao() ? 'Salvando...' : avaliacaoId() ? 'Atualizar avaliação' : 'Salvar avaliação' }}
-      </button>
-
-      @if (avaliacaoId()) {
+  <div class="max-w-3xl">
+    <div class="bg-[#1a1a1a] rounded-xl">
+      <!-- Assistido · Curtido · Watchlist -->
+      <div class="grid grid-cols-3 divide-x divide-white/5">
         <button
           type="button"
-          (click)="apagarAvaliacao()"
-          [disabled]="salvandoAvaliacao()"
-          class="text-sm transition duration-300 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
-          [class]="confirmandoExclusao() ? 'text-red-400 hover:text-red-300' : 'text-gray-400 hover:text-white'">
-          <svg lucideTrash2 [size]="14" strokeWidth="2"></svg>
-          {{ confirmandoExclusao() ? 'Confirmar remoção' : 'Remover' }}
+          (click)="alternarAssistido()"
+          [disabled]="carregando()"
+          [attr.aria-pressed]="assistido()"
+          class="flex flex-col items-center gap-2 py-6 transition duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          [class]="assistido() ? 'text-white' : 'text-gray-500 hover:text-gray-300'">
+          <svg lucideEye [size]="22" strokeWidth="2"></svg>
+          <span class="text-xs font-medium">{{ assistido() ? 'Assistido' : 'Assistir' }}</span>
         </button>
 
-        @if (confirmandoExclusao()) {
-          <button
-            type="button"
-            (click)="confirmandoExclusao.set(false)"
-            class="text-sm text-gray-400 hover:text-white transition duration-300 cursor-pointer">
-            Cancelar
-          </button>
-        }
-      }
+        <button
+          type="button"
+          (click)="alternarCurtido()"
+          [disabled]="carregando()"
+          [attr.aria-pressed]="curtido()"
+          class="flex flex-col items-center gap-2 py-6 transition duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          [class]="curtido() ? 'text-red-500' : 'text-gray-500 hover:text-gray-300'">
+          <svg lucideHeart [size]="22" strokeWidth="2" [attr.fill]="curtido() ? 'currentColor' : 'none'"></svg>
+          <span class="text-xs font-medium">{{ curtido() ? 'Curtido' : 'Curtir' }}</span>
+        </button>
 
-      @if (confirmacao()) {
-        <span class="text-sm text-gray-400" role="status">{{ confirmacao() }}</span>
-      }
-      @if (erro()) {
-        <span class="text-sm text-red-400" role="alert">{{ erro() }}</span>
-      }
+        <button
+          type="button"
+          (click)="alternarWatchlist()"
+          [disabled]="salvandoWatchlist() || carregando()"
+          [attr.aria-pressed]="naWatchlist()"
+          class="flex flex-col items-center gap-2 py-6 transition duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          [class]="naWatchlist() ? 'text-white' : 'text-gray-500 hover:text-gray-300'">
+          @if (naWatchlist()) {
+            <svg lucideCheck [size]="22" strokeWidth="2"></svg>
+          } @else {
+            <svg lucideBookmark [size]="22" strokeWidth="2"></svg>
+          }
+          <span class="text-xs font-medium">{{ naWatchlist() ? 'Na watchlist' : 'Watchlist' }}</span>
+        </button>
+      </div>
+
+      <!-- Nota: meia estrela vale 1, cinco cheias valem 10 -->
+      <div class="border-t border-white/5 py-6 flex flex-col items-center gap-2">
+        <span class="text-xs text-gray-500">Sua nota</span>
+        <div class="flex items-center gap-1" (mouseleave)="notaVisualizada.set(null)">
+          @for (estrela of estrelas; track estrela) {
+            <span class="relative flex">
+              <svg
+                lucideStar
+                [size]="26"
+                strokeWidth="1.5"
+                class="text-gray-700"
+                fill="none"></svg>
+
+              @if (preenchimento(estrela) !== 'vazia') {
+                <span
+                  class="absolute inset-0 overflow-hidden text-yellow-400 pointer-events-none"
+                  [style.width.%]="preenchimento(estrela) === 'meia' ? 50 : 100">
+                  <svg lucideStar [size]="26" strokeWidth="1.5" fill="currentColor"></svg>
+                </span>
+              }
+
+              <button
+                type="button"
+                (click)="definirNota(estrela * 2 - 1)"
+                (mouseenter)="notaVisualizada.set(estrela * 2 - 1)"
+                [disabled]="carregando()"
+                [attr.aria-label]="'Dar nota ' + (estrela * 2 - 1) + ' de 10'"
+                class="absolute inset-y-0 left-0 w-1/2 cursor-pointer disabled:cursor-not-allowed"></button>
+              <button
+                type="button"
+                (click)="definirNota(estrela * 2)"
+                (mouseenter)="notaVisualizada.set(estrela * 2)"
+                [disabled]="carregando()"
+                [attr.aria-label]="'Dar nota ' + estrela * 2 + ' de 10'"
+                class="absolute inset-y-0 right-0 w-1/2 cursor-pointer disabled:cursor-not-allowed"></button>
+            </span>
+          }
+        </div>
+        @if (nota()) {
+          <span class="text-sm text-yellow-400">{{ nota() }}/10</span>
+        } @else {
+          <span class="text-sm text-gray-600">Sem nota</span>
+        }
+      </div>
+
+      <!-- Compartilhar -->
+      <div class="border-t border-white/5">
+        <button
+          type="button"
+          (click)="copiarLink()"
+          class="w-full py-4 text-sm text-gray-400 hover:text-white transition duration-300 flex items-center justify-center gap-2 cursor-pointer">
+          <svg lucideLink [size]="14" strokeWidth="2"></svg>
+          {{ linkCopiado() ? 'Link copiado' : 'Copiar link' }}
+        </button>
+      </div>
     </div>
 
-    @if (erroCarga()) {
-      <p class="mt-4 text-sm text-red-400">
-        {{ erroCarga() }} Salvar agora pode sobrescrever o que você já tinha escrito.
-      </p>
-    }
+    <!-- Texto -->
+    <div class="mt-8">
+      <label for="texto-avaliacao" class="sr-only">Sua avaliação em texto</label>
+      <textarea
+        id="texto-avaliacao"
+        [ngModel]="texto()"
+        (ngModelChange)="texto.set($event)"
+        [disabled]="carregando()"
+        rows="4"
+        maxlength="5000"
+        [placeholder]="carregando() ? 'Carregando sua avaliação...' : 'O que você achou? (opcional)'"
+        class="w-full bg-[#1a1a1a] text-white placeholder-gray-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 resize-y disabled:opacity-60"></textarea>
+
+      <div class="mt-4 flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          (click)="salvarTexto()"
+          [disabled]="salvandoFicha() || carregando()"
+          class="px-6 py-3 rounded-full transition duration-300 flex items-center text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+          {{ salvandoFicha() ? 'Salvando...' : 'Salvar avaliação' }}
+        </button>
+
+        @if (avaliacaoId()) {
+          <button
+            type="button"
+            (click)="apagarFicha()"
+            [disabled]="salvandoFicha()"
+            class="text-sm transition duration-300 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+            [class]="confirmandoExclusao() ? 'text-red-400 hover:text-red-300' : 'text-gray-400 hover:text-white'">
+            <svg lucideTrash2 [size]="14" strokeWidth="2"></svg>
+            {{ confirmandoExclusao() ? 'Confirmar remoção' : 'Remover' }}
+          </button>
+
+          @if (confirmandoExclusao()) {
+            <button
+              type="button"
+              (click)="confirmandoExclusao.set(false)"
+              class="text-sm text-gray-400 hover:text-white transition duration-300 cursor-pointer">
+              Cancelar
+            </button>
+          }
+        }
+
+        @if (confirmacao()) {
+          <span class="text-sm text-gray-400" role="status">{{ confirmacao() }}</span>
+        }
+        @if (erro()) {
+          <span class="text-sm text-red-400" role="alert">{{ erro() }}</span>
+        }
+      </div>
+
+      @if (erroCarga()) {
+        <p class="mt-4 text-sm text-red-400" role="alert">
+          {{ erroCarga() }} Salvar agora pode sobrescrever o que você já tinha escrito.
+        </p>
+      }
+    </div>
   </div>
 }
