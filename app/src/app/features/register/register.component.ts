@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideEye, LucideEyeOff, LucideLock, LucideMail, LucideUser } from '@lucide/angular';
 import { erroMenciona, mensagemDeErro } from '../../core/errors/mensagens';
 import { AuthService } from '../../core/services/auth.service';
@@ -24,6 +24,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class RegisterComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly rota = inject(ActivatedRoute);
 
   name = signal('');
   email = signal('');
@@ -45,7 +46,10 @@ export class RegisterComponent {
     this.auth
       .cadastrar({ name: this.name(), email: this.email(), password: this.password() })
       .subscribe({
-        next: () => void this.router.navigateByUrl('/'),
+        next: () => {
+          const destino = this.rota.snapshot.queryParamMap.get('redirect') ?? '/';
+          void this.router.navigateByUrl(destino);
+        },
         error: (falha) => {
           this.enviando.set(false);
           this.erro.set(
