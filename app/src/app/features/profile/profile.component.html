@@ -14,7 +14,7 @@
     <h2 class="text-3xl font-bold mb-8 text-white">Sua watchlist</h2>
 
     @if (erroWatchlist()) {
-      <p class="text-sm text-red-400 mb-6">{{ erroWatchlist() }}</p>
+      <p class="text-sm text-red-400 mb-6" role="alert">{{ erroWatchlist() }}</p>
     }
 
     @if (carregandoWatchlist()) {
@@ -44,7 +44,7 @@
               (click)="removerDaWatchlist(item)"
               [disabled]="removendo() === item.id"
               [attr.aria-label]="'Remover ' + item.media.title + ' da watchlist'"
-              class="absolute top-2 right-2 z-10 p-2 rounded-full bg-black/70 text-gray-300 hover:text-white hover:bg-black/90 transition duration-300 cursor-pointer opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-60 disabled:cursor-not-allowed">
+              class="absolute top-2 right-2 z-10 p-2 rounded-full bg-black/70 text-gray-300 hover:text-white hover:bg-black/90 transition duration-300 cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 disabled:opacity-60 disabled:cursor-not-allowed">
               <svg lucideX [size]="14" strokeWidth="2"></svg>
             </button>
           </div>
@@ -57,7 +57,7 @@
     <h2 class="text-3xl font-bold mb-8 text-white">Suas avaliações</h2>
 
     @if (erroAvaliacoes()) {
-      <p class="text-sm text-red-400">{{ erroAvaliacoes() }}</p>
+      <p class="text-sm text-red-400" role="alert">{{ erroAvaliacoes() }}</p>
     } @else if (carregandoAvaliacoes()) {
       <div class="space-y-6 max-w-4xl">
         @for (vazio of [1, 2]; track vazio) {
@@ -85,7 +85,26 @@
             @if (avaliacao.content) {
               <p class="mt-3 text-gray-300 whitespace-pre-line">{{ avaliacao.content }}</p>
             }
-            <p class="mt-3 text-xs text-gray-500">{{ avaliacao.createdAt | date: 'dd/MM/yyyy' }}</p>
+            <div class="mt-3 flex flex-wrap items-center gap-4">
+              <p class="text-xs text-gray-500">{{ avaliacao.createdAt | date: 'dd/MM/yyyy' }}</p>
+              <button
+                type="button"
+                (click)="removerAvaliacao(avaliacao)"
+                [disabled]="removendoAvaliacao() === avaliacao.id"
+                class="ml-auto text-sm transition duration-300 flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                [class]="confirmandoAvaliacao() === avaliacao.id ? 'text-red-400 hover:text-red-300' : 'text-gray-400 hover:text-white'">
+                <svg lucideTrash2 [size]="14" strokeWidth="2"></svg>
+                {{ confirmandoAvaliacao() === avaliacao.id ? 'Confirmar exclusão' : 'Excluir' }}
+              </button>
+              @if (confirmandoAvaliacao() === avaliacao.id) {
+                <button
+                  type="button"
+                  (click)="confirmandoAvaliacao.set(null)"
+                  class="text-sm text-gray-400 hover:text-white transition duration-300 cursor-pointer">
+                  Cancelar
+                </button>
+              }
+            </div>
           </article>
         }
       </div>

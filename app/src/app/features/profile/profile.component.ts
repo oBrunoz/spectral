@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { LucideX } from '@lucide/angular';
+import { LucideTrash2, LucideX } from '@lucide/angular';
 import { Subject, takeUntil } from 'rxjs';
 import { mensagemDeErro } from '../../core/errors/mensagens';
 import { AvaliacaoUsuario, ItemWatchlist, Midia } from '../../core/models/catalogo.models';
@@ -13,7 +13,7 @@ import { MovieCardComponent } from '../../shared/components/movie-card/movie-car
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, MovieCardComponent, LucideX],
+  imports: [CommonModule, RouterModule, MovieCardComponent, LucideX, LucideTrash2],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit, OnDestroy {
@@ -28,6 +28,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   erroWatchlist = signal('');
   erroAvaliacoes = signal('');
   removendo = signal<string | null>(null);
+  removendoAvaliacao = signal<string | null>(null);
+  confirmandoAvaliacao = signal<string | null>(null);
 
   readonly notaMedia = computed(() => {
     const notas = this.avaliacoes()
@@ -96,6 +98,33 @@ export class ProfileComponent implements OnInit, OnDestroy {
         error: (falha) => {
           this.erroWatchlist.set(mensagemDeErro(falha));
           this.removendo.set(null);
+        },
+      });
+  }
+
+  removerAvaliacao(avaliacao: AvaliacaoUsuario): void {
+    if (this.removendoAvaliacao()) return;
+
+    if (this.confirmandoAvaliacao() !== avaliacao.id) {
+      this.confirmandoAvaliacao.set(avaliacao.id);
+      return;
+    }
+
+    this.confirmandoAvaliacao.set(null);
+    this.removendoAvaliacao.set(avaliacao.id);
+    this.erroAvaliacoes.set('');
+
+    this.avaliacaoService
+      .remover(avaliacao.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.avaliacoes.update((lista) => lista.filter((a) => a.id !== avaliacao.id));
+          this.removendoAvaliacao.set(null);
+        },
+        error: (falha) => {
+          this.erroAvaliacoes.set(mensagemDeErro(falha));
+          this.removendoAvaliacao.set(null);
         },
       });
   }
