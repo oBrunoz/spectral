@@ -19,13 +19,52 @@
     <!-- Watchlist e avaliação do usuário -->
     @if (details(); as conteudo) {
       <section class="bg-[#0d0d0d] py-16">
-        <div class="px-20">
-          <h2 class="text-3xl font-bold mb-8 text-white">Sua avaliação</h2>
-          <app-media-actions
-            [tmdbId]="conteudo.id"
-            [mediaType]="apiType()"
-            (avaliacaoAlterada)="recarregarAvaliacoesPrisma()">
-          </app-media-actions>
+        <div class="px-20 grid lg:grid-cols-[minmax(0,1fr)_20rem] gap-12 items-start">
+          <div>
+            <h2 class="text-3xl font-bold mb-8 text-white">Sua avaliação</h2>
+            <app-media-actions
+              [tmdbId]="conteudo.id"
+              [mediaType]="apiType()"
+              (avaliacaoAlterada)="recarregarAvaliacoesPrisma()">
+            </app-media-actions>
+          </div>
+
+          <!-- as notas do título, ao lado da ficha do usuário -->
+          @if (estatisticas(); as stats) {
+            @if (stats.total > 0) {
+              <div class="bg-[#1a1a1a] rounded-xl px-8 py-7 lg:mt-16">
+                <h3 class="text-xs tracking-wider text-gray-500 uppercase">Notas no Prisma</h3>
+
+                <div class="mt-6 flex items-end gap-6">
+                  <!-- dez barras têm de caber junto com a nota dentro das 20rem do card -->
+                  <div class="flex items-end gap-1 h-20 flex-1 min-w-0" aria-hidden="true">
+                    @for (barra of barras(); track barra.nota) {
+                      <div class="flex-1 h-full flex items-end">
+                        <div
+                          class="w-full bg-white/30 rounded-sm min-h-[2px]"
+                          [style.height.%]="barra.altura"></div>
+                      </div>
+                    }
+                  </div>
+
+                  @if (stats.notaMedia; as media) {
+                    <p class="shrink-0 text-4xl font-bold text-yellow-400 leading-none">
+                      {{ media | number: '1.1-1' }}
+                    </p>
+                  }
+                </div>
+
+                <p class="mt-5 text-sm text-gray-400">
+                  {{ stats.total }} {{ stats.total === 1 ? 'avaliação' : 'avaliações' }}
+                  @if (stats.curtidas > 0) {
+                    <span class="text-gray-500">
+                      · {{ stats.curtidas }} {{ stats.curtidas === 1 ? 'curtida' : 'curtidas' }}
+                    </span>
+                  }
+                </p>
+              </div>
+            }
+          }
         </div>
       </section>
     }

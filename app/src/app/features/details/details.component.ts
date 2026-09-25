@@ -22,7 +22,7 @@ import { MediaGalleryComponent } from '../../shared/components/media-gallery/med
 import { ReviewCardComponent } from '../../shared/components/review-card/review-card.component';
 import { MediaActionsComponent } from '../../shared/components/media-actions/media-actions.component';
 import { AvaliacaoService } from '../../core/services/avaliacao.service';
-import { AvaliacaoUsuario } from '../../core/models/catalogo.models';
+import { AvaliacaoUsuario, EstatisticasMidia } from '../../core/models/catalogo.models';
 import { mensagemDeErro } from '../../core/errors/mensagens';
 import {
   ContentDetails,
@@ -81,6 +81,18 @@ export class DetailsComponent implements OnInit, OnDestroy {
   avaliacoesPrisma = signal<AvaliacaoUsuario[]>([]);
   carregandoPrisma = signal(true);
   erroPrisma = signal('');
+  estatisticas = signal<EstatisticasMidia | null>(null);
+
+  // altura de cada barra em relação à nota mais votada
+  readonly barras = computed(() => {
+    const dist = this.estatisticas()?.distribuicao ?? [];
+    const pico = Math.max(...dist, 0);
+    return dist.map((quantidade, i) => ({
+      nota: i + 1,
+      quantidade,
+      altura: pico > 0 ? Math.round((quantidade / pico) * 100) : 0,
+    }));
+  });
   contentType = signal<'movies' | 'series' | 'people'>('movies');
   trailerUrl = signal<string>('#');
   backgroundUrl = signal<string>('');
@@ -115,6 +127,7 @@ export class DetailsComponent implements OnInit, OnDestroy {
           this.details.set(null);
           this.trocaDeTitulo$.next();
           this.avaliacoesPrisma.set([]);
+          this.estatisticas.set(null);
           this.erroPrisma.set('');
           this.carregandoPrisma.set(true);
           if (type === 'movies' || type === 'series') this.carregarAvaliacoesPrisma(id);
@@ -175,12 +188,16 @@ export class DetailsComponent implements OnInit, OnDestroy {
     this.carregandoPrisma.set(true);
     this.erroPrisma.set('');
 
-    this.avaliacaoService
-      .porTitulo(id, this.apiType())
+    forkJoin({
+      lista: this.avaliacaoService.porTitulo(id, this.apiType()),
+      // a lista é paginada: somar as notas no cliente daria média errada
+      stats: this.avaliacaoService.estatisticas(id, this.apiType()),
+    })
       .pipe(takeUntil(this.trocaDeTitulo$), takeUntil(this.destroy$))
       .subscribe({
-        next: (lista) => {
+        next: ({ lista, stats }) => {
           this.avaliacoesPrisma.set(lista);
+          this.estatisticas.set(stats);
           this.carregandoPrisma.set(false);
         },
         error: (falha) => {
