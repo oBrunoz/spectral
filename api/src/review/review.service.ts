@@ -92,6 +92,52 @@ export class ReviewService {
     });
   }
 
+  // agregacao no banco: somar no cliente daria numero errado, a lista e paginada
+  async estatisticasDaMidia(tmdbId: number, type: MediaType) {
+    const vazio = {
+      total: 0,
+      notaMedia: null as number | null,
+      curtidas: 0,
+      distribuicao: Array<number>(10).fill(0),
+    };
+
+    const media = await this.prisma.media.findUnique({
+      where: { tmdbId_type: { tmdbId, type } },
+      select: { id: true },
+    });
+    if (!media) return vazio;
+
+    const [porNota, curtidas, total] = await Promise.all([
+      this.prisma.review.groupBy({
+        by: ['rating'],
+        where: { mediaId: media.id, rating: { not: null } },
+        _count: { _all: true },
+      }),
+      this.prisma.review.count({ where: { mediaId: media.id, liked: true } }),
+      this.prisma.review.count({ where: { mediaId: media.id } }),
+    ]);
+
+    const distribuicao = Array<number>(10).fill(0);
+    let soma = 0;
+    let comNota = 0;
+
+    for (const linha of porNota) {
+      const nota = linha.rating;
+      if (nota === null) continue;
+      const quantidade = linha._count._all;
+      distribuicao[nota - 1] = quantidade;
+      soma += nota * quantidade;
+      comNota += quantidade;
+    }
+
+    return {
+      total,
+      notaMedia: comNota > 0 ? soma / comNota : null,
+      curtidas,
+      distribuicao,
+    };
+  }
+
   listByUser(userId: string, pagina: PaginationDto) {
     return this.prisma.review.findMany({
       where: { userId },
