@@ -29,9 +29,11 @@ export class AuthService {
   async login(dto: LoginDto): Promise<AuthResult> {
     const user = await this.userService.findByEmail(dto.email);
 
-    // mesma mensagem para e-mail inexistente e senha errada:
-    // responder "e-mail nao cadastrado" entrega quem tem conta no site
-    if (!user || !(await this.userService.verifyPassword(user, dto.password))) {
+    const senhaConfere = await this.userService.verifyPassword(
+      user,
+      dto.password,
+    );
+    if (!user || !senhaConfere) {
       throw new UnauthorizedException('E-mail ou senha invalidos');
     }
 
