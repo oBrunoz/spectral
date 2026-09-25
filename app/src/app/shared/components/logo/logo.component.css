@@ -1,0 +1,61 @@
+/* A altura vem de quem usa (h-7, h-32...); a largura sai do viewBox.
+   A cor é o creme da marca. Esconder/mostrar por breakpoint num wrapper:
+   o display do :host empata em especificidade com as utilities do Tailwind. */
+:host {
+  display: inline-flex;
+  color: #f3ead6;
+}
+
+svg {
+  display: block;
+  height: 100%;
+  width: auto;
+  overflow: visible;
+}
+
+/* Abertura (~1.7s): a janela surge e a folha abre na dobradiça; conforme ela
+   abre, as letras entram da esquerda e o ponto vermelho fecha.
+   Tudo com fill "both", sem estado em TS. */
+:host(.intro) .caixilho {
+  animation: surgir 400ms ease-out both;
+}
+
+:host(.intro) .folha {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: abrir 700ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms both;
+}
+
+:host(.intro) .letra {
+  transform-box: fill-box;
+  animation: letra 550ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(650ms + var(--i) * 70ms) both;
+}
+
+:host(.intro) .ponto {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ponto 350ms cubic-bezier(0.3, 1.6, 0.5, 1) 1350ms both;
+}
+
+@keyframes surgir {
+  from { opacity: 0; }
+}
+
+@keyframes abrir {
+  from { transform: scaleX(0); opacity: 0; }
+  30% { opacity: 1; }
+}
+
+@keyframes letra {
+  from { opacity: 0; transform: translateX(-18%); }
+}
+
+@keyframes ponto {
+  from { opacity: 0; transform: scale(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(.intro) * {
+    animation: none !important;
+  }
+}

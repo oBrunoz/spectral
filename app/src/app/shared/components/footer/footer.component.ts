@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { LogoComponent } from '../logo/logo.component';
 
 interface FooterLink {
   label: string;
@@ -10,7 +11,7 @@ interface FooterLink {
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LogoComponent],
   templateUrl: './footer.component.html',
 })
 export class FooterComponent {
@@ -25,6 +26,6 @@ export class FooterComponent {
   conta: FooterLink[] = [
     { label: 'Entrar', route: '/login' },
     { label: 'Criar conta', route: '/register' },
-    { label: 'Sobre o Boxd', route: '/' },
+    { label: 'Sobre o Prisma', route: '/' },
   ];
 }

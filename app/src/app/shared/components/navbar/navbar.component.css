@@ -26,13 +26,13 @@
 .progress-bar {
   background: linear-gradient(
     90deg,
-    #e50914,
-    #ff8a00,
-    #ffd166,
-    #06d6a0,
-    #4cc9f0,
-    #b5179e,
-    #e50914
+    #c8635a,
+    #d9905e,
+    #e2c27d,
+    #8fae8b,
+    #6e8fa8,
+    #9a84a8,
+    #c8635a
   );
   background-size: 300% 100%;
   animation: projector-hue 3s linear infinite;
@@ -42,7 +42,7 @@
 }
 
 .progress-bar--beam {
-  box-shadow: 0 0 10px rgba(229, 9, 20, 0.7), 0 0 22px rgba(76, 201, 240, 0.35);
+  box-shadow: 0 0 10px rgba(255, 227, 173, 0.45), 0 0 22px rgba(200, 99, 90, 0.35);
 }
 
 .progress-head {
@@ -53,8 +53,8 @@
   width: 10px;
   height: 10px;
   border-radius: 9999px;
-  background: #fff;
-  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.85);
+  background: #f3ead6;
+  box-shadow: 0 0 10px 2px rgba(255, 227, 173, 0.8);
   opacity: 0.9;
 }
 

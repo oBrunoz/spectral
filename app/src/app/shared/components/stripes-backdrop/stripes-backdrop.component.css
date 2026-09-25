@@ -41,14 +41,14 @@
   }
 }
 
-/* Mobile: menos fios e mais discreto ainda. */
+/* Mobile: as seis faixas ficam (é o espectro da marca), mas mais finas —
+   o deslocamento em % aperta o feixe e os traços de 8px se sobreporiam. */
 @media (max-width: 639px) {
   .ribbon {
     opacity: 0.14;
   }
 
-  .wire--3,
-  .wire--4 {
-    display: none;
+  .wire {
+    stroke-width: 5px;
   }
 }

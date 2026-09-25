@@ -16,7 +16,7 @@ import { StripesBackdropComponent } from './shared/components/stripes-backdrop/s
   ],
 })
 export class App implements OnInit {
-  title = 'boxd';
+  title = 'prisma';
 
   private smoothScroll = inject(SmoothScrollService);
 

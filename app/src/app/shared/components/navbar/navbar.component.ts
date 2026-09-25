@@ -21,11 +21,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { MediaResult } from '../../../core/models/tmdb.models';
 import { LucideSearch, LucideStar, LucideX } from '@lucide/angular';
 import { MediaFallbackComponent } from '../media-fallback/media-fallback.component';
+import { LogoComponent } from '../logo/logo.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LucideSearch, LucideStar, LucideX, MediaFallbackComponent],
+  imports: [CommonModule, RouterModule, FormsModule, LucideSearch, LucideStar, LucideX, MediaFallbackComponent, LogoComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })

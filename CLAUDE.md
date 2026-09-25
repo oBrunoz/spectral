@@ -1,6 +1,6 @@
-# Boxd
+# Prisma
 
-Catálogo de filmes e séries (dados da TMDB). Angular 20 standalone + Tailwind 3.
+(antigo Boxd — o repositório e a pasta mantêm o nome antigo.) Catálogo de filmes e séries (dados da TMDB). Angular 20 standalone + Tailwind 3.
 A aplicação vive em `app/` — todo comando npm roda a partir de lá.
 
 ```bash
@@ -18,7 +18,7 @@ app/src/app/
   core/models/        tmdb.models.ts
   features/           home, movies, series, details, login, register
   shared/components/  navbar, footer, hero-section, movie-card, cast-card,
-                      carousel-row, stripes-backdrop
+                      carousel-row, stripes-backdrop, logo
   shared/directives/  reveal.directive (appReveal)
 ```
 
@@ -29,6 +29,17 @@ Controle de fluxo no template usa a sintaxe nova: `@if` / `@for` / `@else`.
 ## Vocabulário visual
 
 Seguir o que já existe, não introduzir um sistema novo.
+
+- **Marca:** sempre via `<app-logo>` (`mark` | `horizontal` | `spectral`), nunca
+  texto ou PNG. Lettering são contornos da Montserrat SemiBold com tracking 0.16em
+  (mesma família da logo Boxd antiga); janela em creme
+  `#F3EAD6`; ponto quadrado `#E63946`. Mestres em `app/public/brand/`, origem no
+  Figma "Prisma" (arquivo `5nW8B65k5qP0JlWTjLy4Uz`).
+- **Vermelho:** `red-400…700` do Tailwind foram remapeados para o vermelho da marca
+  (`600` = `#E63946`) em `tailwind.config.js` — continuar usando `bg-red-600` etc.
+- **Espectro:** seis faixas pastel `#C8635A #D9905E #E2C27D #8FAE8B #6E8FA8 #9A84A8`,
+  com grão de impressão (`feTurbulence`). Só em momentos de marca: logo espectral,
+  `stripes-backdrop` e barra de loading. Nunca em UI do dia a dia.
 
 - **Fundos:** hex neutros — `#111111` (body), `#1a1a1a` (cards), `#0d0d0d` (footer,
   seções de respiro). **Não usar `gray-800`/`gray-900` do Tailwind**: têm pigmento

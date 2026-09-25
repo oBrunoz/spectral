@@ -1,8 +1,10 @@
-<h1 align=""> Boxd </h1>
+<p align="center"><img src="app/public/brand/og-image.png" alt="Prisma" width="600"></p>
+
+<h1 align=""> Prisma </h1>
 
 ![Status](https://img.shields.io/badge/status-em%20desenvolvimento-blue)
 
-**Boxd** é uma plataforma web inspirada em serviços como *Letterboxd*, que permite aos usuários explorarem, pesquisarem e descobrirem filmes, séries e pessoas do universo do cinema. Tudo isso com um visual moderno, recursos de busca instantânea e integração com a **API do TMDB**.
+**Prisma** é uma plataforma web inspirada em serviços como *Letterboxd*, que permite aos usuários explorarem, pesquisarem e descobrirem filmes, séries e pessoas do universo do cinema. Tudo isso com um visual moderno, recursos de busca instantânea e integração com a **API do TMDB**.
 
 ---
 

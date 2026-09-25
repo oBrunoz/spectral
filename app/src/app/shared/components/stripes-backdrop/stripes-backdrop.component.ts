@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 /**
- * Camada decorativa de fundo: uma fita de quatro fios coloridos que atravessa
+ * Camada decorativa de fundo: uma fita com as seis faixas do espectro que atravessa
  * a página inteira, ancorada à altura do documento.
  *
  * É puramente declarativa — sem listener de scroll, sem animação, sem estado.
