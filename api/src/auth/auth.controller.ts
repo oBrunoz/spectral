@@ -1,0 +1,95 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import type { CookieOptions, Request, Response } from 'express';
+import { CreateUserDto } from '../user/dto/create-user.dto.js';
+import { PublicUserDto } from '../user/dto/public-user.dto.js';
+import { REFRESH_COOKIE, REFRESH_COOKIE_PATH } from './auth.constants.js';
+import { AuthResult, AuthService } from './auth.service.js';
+import { LoginDto } from './dto/login.dto.js';
+import { TokenPair } from './token.service.js';
+
+interface SessionResponse {
+  user?: PublicUserDto;
+  accessToken: string;
+}
+
+@Controller('auth')
+export class AuthController {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly config: ConfigService,
+  ) {}
+
+  @Post('register')
+  async register(
+    @Body() dto: CreateUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SessionResponse> {
+    return this.emitSession(await this.authService.register(dto), res);
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SessionResponse> {
+    return this.emitSession(await this.authService.login(dto), res);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SessionResponse> {
+    const tokens = await this.authService.refresh(this.readRefreshCookie(req));
+    this.setRefreshCookie(res, tokens);
+    return { accessToken: tokens.accessToken };
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
+    const cookie = req.cookies?.[REFRESH_COOKIE] as string | undefined;
+    if (cookie) {
+      await this.authService.logout(cookie);
+    }
+    res.clearCookie(REFRESH_COOKIE, { path: REFRESH_COOKIE_PATH });
+  }
+
+  private emitSession({ user, tokens }: AuthResult, res: Response): SessionResponse {
+    this.setRefreshCookie(res, tokens);
+    return { user, accessToken: tokens.accessToken };
+  }
+
+  private readRefreshCookie(req: Request): string {
+    const cookie = req.cookies?.[REFRESH_COOKIE] as string | undefined;
+    if (!cookie) {
+      throw new UnauthorizedException('Sem refresh token');
+    }
+    return cookie;
+  }
+
+  // httpOnly: JavaScript da pagina nao le. e a defesa contra XSS roubar a sessao.
+  private setRefreshCookie(res: Response, tokens: TokenPair): void {
+    const producao = this.config.getOrThrow<string>('NODE_ENV') === 'production';
+    const options: CookieOptions = {
+      httpOnly: true,
+      secure: producao,
+      sameSite: 'lax',
+      path: REFRESH_COOKIE_PATH,
+      expires: tokens.refreshExpiresAt,
+    };
+    res.cookie(REFRESH_COOKIE, tokens.refreshToken, options);
+  }
+}
